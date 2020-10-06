@@ -1,4 +1,7 @@
 import pygame as pg
+import os
+
+# All icons made by Freepik from www.flaticon.com
 
 class Graphics:
     HEIGHT = 800
@@ -28,11 +31,27 @@ class Game:
         board = Board()
         board.load_squares_dict()
         board.draw()
+        self.set_pieces()
+        self.draw_pieces()
         while self.running:
             graphics.update()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
+    def set_pawns(self):
+        y_coord = Board.HEIGHT - 2
+        for x_coord in range(Board.WIDTH):
+            Board.squares[(x_coord, y_coord)] = Pawn('white')
+        y_coord = 1
+        for x_coord in range(Board.WIDTH):
+            Board.squares[(x_coord, y_coord)] = Pawn('black')
+    def set_pieces(self):
+        self.set_pawns()
+    def draw_pieces(self):
+        for square in Board.squares:
+            if Board.squares[square] != None:
+                Graphics.screen.blit(Board.squares[square].image, Graphics.pixelate(square))
+
 
 
 class Board:
@@ -57,19 +76,21 @@ class Board:
         for y_coord in range(self.HEIGHT):
             for x_coord in range(self.WIDTH):
                 self.squares[(x_coord, y_coord)] = None
-        print(self.squares)
 
 class Piece:
-    pass
+    def __init__(self):
+        self.possible_moves = []
 
 class Pawn(Piece):
-    pass
+    def __init__(self, color):
+        self.name = 'pawn'
+        self.color = color
+        self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
+        
 
 def main():
-    # graphics = Graphics()
     game = Game()
     game.run()
-    # board = Board()
 
 if __name__ == "__main__":
     main()
