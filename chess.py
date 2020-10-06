@@ -26,10 +26,11 @@ class Graphics:
 class Game:
     def __init__(self):
         self.running = True
+        self.objects = {}
     def run(self):
         graphics = Graphics()
         board = Board()
-        board.load_squares_dict()
+        self.set_square_objects()
         board.draw()
         self.set_pieces()
         self.draw_pieces()
@@ -38,19 +39,23 @@ class Game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
+    def set_square_objects(self):
+        for y_coord in range(Board.HEIGHT):
+            for x_coord in range(Board.WIDTH):
+                self.objects[Square((x_coord, y_coord))] = None       
     def set_pawns(self):
         y_coord = Board.HEIGHT - 2
         for x_coord in range(Board.WIDTH):
-            Board.squares[(x_coord, y_coord)] = Pawn('white')
+            self.objects[(x_coord, y_coord)] = Pawn('white')
         y_coord = 1
         for x_coord in range(Board.WIDTH):
-            Board.squares[(x_coord, y_coord)] = Pawn('black')
+            self.objects[(x_coord, y_coord)] = Pawn('black')
     def set_pieces(self):
         self.set_pawns()
     def draw_pieces(self):
-        for square in Board.squares:
-            if Board.squares[square] != None:
-                Graphics.screen.blit(Board.squares[square].image, Graphics.pixelate(square))
+        for square in self.objects:
+            if self.objects[square] != None:
+                Graphics.screen.blit(self.objects[square].image, Graphics.pixelate(square))
 
 
 
@@ -61,7 +66,7 @@ class Board:
     BOARD_SIZE = SQUARE_SIZE * WIDTH
     SQUARE_COLOR_1 = Graphics.TAN
     SQUARE_COLOR_2 = Graphics.DARK_GREEN
-    squares = {}
+    # squares = {}
     def draw(self):
         Graphics.screen.fill(self.SQUARE_COLOR_2)
         for y_coord in range(0,self.HEIGHT,2):
@@ -72,10 +77,11 @@ class Board:
             for x_coord in range(1, self.WIDTH, 2):
                 x_pixel, y_pixel = Graphics.pixelate((x_coord, y_coord))
                 pg.draw.rect(Graphics.screen,self.SQUARE_COLOR_1,(x_pixel, y_pixel, self.SQUARE_SIZE,self.SQUARE_SIZE))
-    def load_squares_dict(self):
-        for y_coord in range(self.HEIGHT):
-            for x_coord in range(self.WIDTH):
-                self.squares[(x_coord, y_coord)] = None
+
+class Square:
+    def __init__(self, coords):
+        self.coords = coords
+        self.highlighted = False
 
 class Piece:
     def __init__(self):
@@ -86,7 +92,8 @@ class Pawn(Piece):
         self.name = 'pawn'
         self.color = color
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
-        
+    def update_possible_moves(self):
+        pass
 
 def main():
     game = Game()
