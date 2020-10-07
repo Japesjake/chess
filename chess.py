@@ -66,7 +66,6 @@ class Board:
     BOARD_SIZE = SQUARE_SIZE * WIDTH
     SQUARE_COLOR_1 = Graphics.TAN
     SQUARE_COLOR_2 = Graphics.DARK_GREEN
-    # squares = {}
     def draw(self):
         Graphics.screen.fill(self.SQUARE_COLOR_2)
         for y_coord in range(0,self.HEIGHT,2):
@@ -92,7 +91,7 @@ class Pawn(Piece):
         self.name = 'pawn'
         self.color = color
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
-    def update_possible_moves(self):
+    def get_possible_moves(self):
         pass
 
 def main():
