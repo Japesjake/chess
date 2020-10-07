@@ -41,14 +41,7 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        # self.objects.clear()
-                        # self.objects[Square((0,1))] = Pawn("black") #Why doesn't it override?
-                        for square, piece in self.objects.items():
-                            if piece != None: 
-                                if piece.is_clicked():
-                                    piece.selected = True
-                                    for square, piece in self.objects.items():
-                                        print(square.coords, piece)
+                        self.select_piece()
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -58,19 +51,33 @@ class Game:
         for x_coord in range(Board.WIDTH):
             for square, piece in self.objects.items():
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('white', square.coords)
+                    self.objects[square] = Pawn('pawn', 'white', square.coords)
         y_coord = 1
         for x_coord in range(Board.WIDTH):
             for square, piece in self.objects.items():
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('black', square.coords)
+                    self.objects[square] = Pawn('pawn', 'black', square.coords)
     def set_pieces(self):
         self.set_pawns()
     def draw_pieces(self):
         for square in self.objects:
             if self.objects[square] != None:
                 Graphics.screen.blit(self.objects[square].image, Graphics.pixelate(square.coords))
-    
+    def select_piece(self):
+        for square, piece in self.objects.items():
+            if piece != None and square.is_clicked():
+                if piece.selected:
+                    selected_before_reset = True
+                else:
+                    selected_before_reset = False
+                # Resets all pieces to unselected status
+                for piece_to_be_unselected in self.objects.values():
+                    if piece_to_be_unselected != None:
+                        piece_to_be_unselected.selected = False
+                if selected_before_reset:
+                    piece.selected = False
+                else:
+                    piece.selected = True
 
 
 class Board:
@@ -95,6 +102,13 @@ class Square:
     def __init__(self, coords):
         self.coords = coords
         self.highlighted = False
+    def is_clicked(self):
+        mouse_x, mouse_y = pg.mouse.get_pos()
+        # print(pg.mouse.get_pos())
+        square_x, square_y = Graphics.pixelate(self.coords)
+        if square_x <= mouse_x <= square_x + Board.SQUARE_SIZE and square_y <= mouse_y <= square_y + Board.SQUARE_SIZE:
+            return True
+        return False
     # def is_forward_square_occupied():
     #     for square, piece in Game.objects.items():
     #         if piece.selected:
@@ -113,29 +127,18 @@ class Square:
 
 
 class Piece:
-    def __init__(self):
+    def __init__(self, name, color, location):
+        self.name = name
+        self.color = color
+        self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
+        self.location = location
         self.possible_moves = []
         self.selected = False
-    # def update_possible_moves(piece):
-    #     self.possible_moves = piece.return_possible_moves()
-    def is_clicked(self):
-        mouse_x, mouse_y = pg.mouse.get_pos()
-        # print(pg.mouse.get_pos())
-        piece_x, piece_y = Graphics.pixelate(self.location)
-        if piece_x <= mouse_x <= piece_x + Board.SQUARE_SIZE and piece_y <= mouse_y <= piece_y + Board.SQUARE_SIZE:
-            return True
-        return False
 
 
 class Pawn(Piece):
-    def __init__(self, color, location):
-        self.name = 'pawn'
-        self.color = color
-        self.location = location
-        self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
-    def return_possible_moves(self):
-        for square in Game.objects:
-            pass
+    def __init__(self, name, color, location):
+        Piece.__init__(self, name, color, location)
 
 
 
