@@ -27,7 +27,6 @@ class Game:
     objects = {}
     def __init__(self):
         self.running = True
-        # self.objects = {}
     def run(self):
         graphics = Graphics()
         board = Board()
@@ -42,7 +41,8 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.objects = {Square((0,1)):Pawn('black')} #Why doesn't it override?
+                        # self.objects.clear()
+                        # self.objects[Square((0,1))] = Pawn("black") #Why doesn't it override?
                         for square, piece in self.objects.items():
                             if piece != None: 
                                 if piece.is_clicked():
@@ -58,19 +58,19 @@ class Game:
         for x_coord in range(Board.WIDTH):
             for square, piece in self.objects.items():
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('white')
+                    self.objects[square] = Pawn('white', square.coords)
         y_coord = 1
         for x_coord in range(Board.WIDTH):
             for square, piece in self.objects.items():
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('black')
+                    self.objects[square] = Pawn('black', square.coords)
     def set_pieces(self):
         self.set_pawns()
     def draw_pieces(self):
         for square in self.objects:
             if self.objects[square] != None:
                 Graphics.screen.blit(self.objects[square].image, Graphics.pixelate(square.coords))
-
+    
 
 
 class Board:
@@ -120,18 +120,18 @@ class Piece:
     #     self.possible_moves = piece.return_possible_moves()
     def is_clicked(self):
         mouse_x, mouse_y = pg.mouse.get_pos()
-        print(pg.mouse.get_pos())
-        for square, piece in Game.objects.items():
-            square_x, square_y = Graphics.pixelate(square.coords)
-            if square_x <= mouse_x <= square_x + Board.SQUARE_SIZE and square_y <= mouse_y <= square_y + Board.SQUARE_SIZE:
-                return True
-            return False
+        # print(pg.mouse.get_pos())
+        piece_x, piece_y = Graphics.pixelate(self.location)
+        if piece_x <= mouse_x <= piece_x + Board.SQUARE_SIZE and piece_y <= mouse_y <= piece_y + Board.SQUARE_SIZE:
+            return True
+        return False
 
 
 class Pawn(Piece):
-    def __init__(self, color):
+    def __init__(self, color, location):
         self.name = 'pawn'
         self.color = color
+        self.location = location
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
     def return_possible_moves(self):
         for square in Game.objects:
