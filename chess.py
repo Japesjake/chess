@@ -42,6 +42,7 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.objects = {Square((0,1)):Pawn('black')} #Why doesn't it override?
                         for square, piece in self.objects.items():
                             if piece != None: 
                                 if piece.is_clicked():
