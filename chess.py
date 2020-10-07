@@ -19,9 +19,25 @@ class Graphics:
         self.set_caption = pg.display.set_caption("Chess")
     def update(self):
         pg.display.update()
+    @staticmethod
     def pixelate(tuple):
         x, y = tuple
         return (Board.SQUARE_SIZE * x, Board.SQUARE_SIZE * y)
+    def draw_pieces(self):
+        for square, piece in Game.objects.items():
+            if piece != None:
+                self.screen.blit(piece.image, self.pixelate(square.coords))
+    def draw_board(self):
+        self.screen.fill(Board.SQUARE_COLOR_2)
+        for y_coord in range(0,Board.HEIGHT,2):
+            for x_coord in range(0, Board.WIDTH, 2):
+                x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
+                pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
+        for y_coord in range(1,Board.HEIGHT,2):
+            for x_coord in range(1, Board.WIDTH, 2):
+                x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
+                pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
+
 
 class Game:
     objects = {}
@@ -31,9 +47,9 @@ class Game:
         graphics = Graphics()
         board = Board()
         self.set_squares()
-        board.draw()
+        graphics.draw_board()
         self.set_pieces()
-        self.draw_pieces()
+        graphics.draw_pieces()
         while self.running:
             graphics.update()
             for event in pg.event.get():
@@ -42,6 +58,9 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
+                        for piece in self.objects.values():
+                            if piece != None:
+                                print(piece.selected)
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -59,10 +78,6 @@ class Game:
                     self.objects[square] = Pawn('pawn', 'black', square.coords)
     def set_pieces(self):
         self.set_pawns()
-    def draw_pieces(self):
-        for square in self.objects:
-            if self.objects[square] != None:
-                Graphics.screen.blit(self.objects[square].image, Graphics.pixelate(square.coords))
     def select_piece(self):
         for square, piece in self.objects.items():
             if piece != None and square.is_clicked():
@@ -79,7 +94,6 @@ class Game:
                 else:
                     piece.selected = True
 
-
 class Board:
     WIDTH = 8
     HEIGHT = WIDTH
@@ -87,16 +101,6 @@ class Board:
     BOARD_SIZE = SQUARE_SIZE * WIDTH
     SQUARE_COLOR_1 = Graphics.TAN
     SQUARE_COLOR_2 = Graphics.DARK_GREEN
-    def draw(self):
-        Graphics.screen.fill(self.SQUARE_COLOR_2)
-        for y_coord in range(0,self.HEIGHT,2):
-            for x_coord in range(0, self.WIDTH, 2):
-                x_pixel, y_pixel = Graphics.pixelate((x_coord, y_coord))
-                pg.draw.rect(Graphics.screen,self.SQUARE_COLOR_1,(x_pixel, y_pixel, self.SQUARE_SIZE,self.SQUARE_SIZE))
-        for y_coord in range(1,self.HEIGHT,2):
-            for x_coord in range(1, self.WIDTH, 2):
-                x_pixel, y_pixel = Graphics.pixelate((x_coord, y_coord))
-                pg.draw.rect(Graphics.screen,self.SQUARE_COLOR_1,(x_pixel, y_pixel, self.SQUARE_SIZE,self.SQUARE_SIZE))
 
 class Square:
     def __init__(self, coords):
