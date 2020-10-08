@@ -24,9 +24,9 @@ class Graphics:
         x, y = tuple
         return (Board.SQUARE_SIZE * x, Board.SQUARE_SIZE * y)
     def draw_pieces(self):
-        for square, piece in Game.objects.items():
-            if piece:
-                self.screen.blit(piece.image, self.pixelate(square.coords))
+        for square in Game.squares:
+            if square.piece:
+                self.screen.blit(square.piece.image, self.pixelate(square.coords))
     def draw_board(self):
         self.screen.fill(Board.SQUARE_COLOR_2)
         for y_coord in range(0,Board.HEIGHT,2):
@@ -38,13 +38,13 @@ class Graphics:
                 x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
                 pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
     def draw_selection(self):
-        for square, piece in Game.objects.items():
-            if piece and piece.selected:
+        for square in Game.squares:
+            if square.piece and square.piece.selected:
                 x_pixel, y_pixel = self.pixelate(square.coords)
                 pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
 
 class Game:
-    objects = {}
+    squares = set()
     def __init__(self):
         self.running = True
         self.turn = 'white'
@@ -65,44 +65,45 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
-                        # for piece in self.objects.values():
-                        #     if piece:
-                        #         print(piece.selected)
+                        for square in Game.squares:
+                            if square.piece:
+                                print(square.piece.selected)
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
-                self.objects[Square((x_coord, y_coord))] = None       
+                self.squares.add(Square((x_coord, y_coord)))     
     def set_pawns(self):
         y_coord = Board.HEIGHT - 2
         for x_coord in range(Board.WIDTH):
-            for square, piece in self.objects.items():
+            for square in self.squares:
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('pawn', 'white', square.coords)
+                    square.piece = Pawn('pawn', 'white', square.coords)
         y_coord = 1
         for x_coord in range(Board.WIDTH):
-            for square, piece in self.objects.items():
+            for square in self.squares:
                 if square.coords == (x_coord, y_coord):
-                    self.objects[square] = Pawn('pawn', 'black', square.coords)
+                    square.piece = Pawn('pawn', 'black', square.coords)
     def set_pieces(self):
         self.set_pawns()
     def select_piece(self):
-        for square, piece in self.objects.items():
-            if piece and self.turn == piece.color and square.is_clicked():
-                if piece.selected:
+        for square in self.squares:
+            if square.piece and self.turn == square.piece.color and square.is_clicked():
+                if square.piece.selected:
                     selected_before_reset = True
                 else:
                     selected_before_reset = False
-                # Resets all pieces to unselected status
-                for piece_to_be_unselected in self.objects.values():
-                    if piece_to_be_unselected:
-                        piece_to_be_unselected.selected = False
+                self.unselect_pieces()
                 if selected_before_reset:
-                    piece.selected = False
+                    square.piece.selected = False
                 else:
-                    piece.selected = True
+                    square.piece.selected = True
+    def unselect_pieces(self):
+        for square in self.squares:
+            if square.piece and square.piece.selected == True:
+                square.piece.selected = False
     def is_piece_selected(self):
-        for piece in self.objects.values():
-            if piece and piece.selected:
+        for square in self.squares:
+            if square.piece and square.piece.selected:
                 return True
         return False
 
@@ -118,6 +119,7 @@ class Square:
     def __init__(self, coords):
         self.coords = coords
         self.highlighted = False
+        self.piece = None
     def is_clicked(self):
         mouse_x, mouse_y = pg.mouse.get_pos()
         # print(pg.mouse.get_pos())
@@ -126,7 +128,7 @@ class Square:
             return True
         return False
     def is_forward_occupied():
-        for square, piece in Game.objects.items():
+        for square, piece in Game.squares.items():
             if piece and piece.selected:
                 if piece.color == 'white':
                     direction = -1
@@ -134,7 +136,7 @@ class Square:
                     direction = 1
                 x_selected, y_selected = square.coords
                 x_forward, y_forward = x_selected, y_selected + direction
-        for square, piece in Game.objects.items():
+        for square, piece in Game.squares.items():
             if square.coords == (x_forward, y_forward):
                 if piece:
                     return True
