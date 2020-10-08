@@ -37,20 +37,27 @@ class Graphics:
             for x_coord in range(1, Board.WIDTH, 2):
                 x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
                 pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
-
+    def draw_selection(self):
+        for square, piece in Game.objects.items():
+            if piece != None and piece.selected:
+                x_pixel, y_pixel = self.pixelate(square.coords)
+                pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
 
 class Game:
     objects = {}
     def __init__(self):
         self.running = True
+        self.turn = 'white'
     def run(self):
         graphics = Graphics()
         board = Board()
         self.set_squares()
-        graphics.draw_board()
         self.set_pieces()
-        graphics.draw_pieces()
         while self.running:
+            graphics.draw_board()
+            graphics.draw_pieces()
+            if self.is_piece_selected():
+                graphics.draw_selection()
             graphics.update()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -80,7 +87,7 @@ class Game:
         self.set_pawns()
     def select_piece(self):
         for square, piece in self.objects.items():
-            if piece != None and square.is_clicked():
+            if piece != None and self.turn == piece.color and square.is_clicked():
                 if piece.selected:
                     selected_before_reset = True
                 else:
@@ -93,7 +100,12 @@ class Game:
                     piece.selected = False
                 else:
                     piece.selected = True
-
+    def is_piece_selected(self):
+        for piece in self.objects.values():
+            if piece != None and piece.selected:
+                return True
+        return False
+        
 class Board:
     WIDTH = 8
     HEIGHT = WIDTH
@@ -113,7 +125,7 @@ class Square:
         if square_x <= mouse_x <= square_x + Board.SQUARE_SIZE and square_y <= mouse_y <= square_y + Board.SQUARE_SIZE:
             return True
         return False
-    # def is_forward_square_occupied():
+    # def is_forward_occupied():
     #     for square, piece in Game.objects.items():
     #         if piece.selected:
     #             if piece.color == 'white':
