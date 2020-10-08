@@ -65,9 +65,9 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
-                        for square in Game.squares:
-                            if square.piece:
-                                print(square.piece.selected)
+                        # self.print_if_selected()
+
+
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -88,15 +88,10 @@ class Game:
     def select_piece(self):
         for square in self.squares:
             if square.piece and self.turn == square.piece.color and square.is_clicked():
-                if square.piece.selected:
-                    selected_before_reset = True
-                else:
-                    selected_before_reset = False
+                selected_before_reset = square.piece.selected
                 self.unselect_pieces()
-                if selected_before_reset:
-                    square.piece.selected = False
-                else:
-                    square.piece.selected = True
+                square.piece.selected = not selected_before_reset
+                square.piece.update_possible_moves()
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -106,6 +101,10 @@ class Game:
             if square.piece and square.piece.selected:
                 return True
         return False
+    def print_if_selected(self):
+        for square in self.squares:
+            if square.piece:
+                print(square.piece.selected)
 
 class Board:
     WIDTH = 8
@@ -127,42 +126,40 @@ class Square:
         if square_x <= mouse_x <= square_x + Board.SQUARE_SIZE and square_y <= mouse_y <= square_y + Board.SQUARE_SIZE:
             return True
         return False
-    def is_forward_occupied():
-        for square, piece in Game.squares.items():
-            if piece and piece.selected:
-                if piece.color == 'white':
-                    direction = -1
-                else:
-                    direction = 1
-                x_selected, y_selected = square.coords
-                x_forward, y_forward = x_selected, y_selected + direction
-        for square, piece in Game.squares.items():
-            if square.coords == (x_forward, y_forward):
-                if piece:
-                    return True
-                return False
         
-
-
 class Piece:
     def __init__(self, name, color, location):
         self.name = name
         self.color = color
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
         self.location = location
-        self.possible_moves = []
+        self.possible_moves = set()
         self.selected = False
-
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
         Piece.__init__(self, name, color, location)
     def update_possible_moves(self):
-        for square, piece in Game.object.items():
-            if self.selected:
-                pass
-
-
+        x_piece, y_piece = self.location
+        for square in Game.squares:
+            x_square, y_square = square.coords
+            if self.is_forward_empty() and x_piece == x_square and y_piece + self.direction() == y_square:
+                self.possible_moves.add(square.coords)
+                print(self.possible_moves)
+    def is_forward_empty(self):
+        for square in Game.squares:
+            x_selected, y_selected = square.coords
+            x_forward, y_forward = x_selected, y_selected + self.direction()
+            for square in Game.squares:
+                if square.coords == (x_forward, y_forward):
+                    if square.piece:
+                        return False
+                    return True 
+    def direction(self):
+        if self.color == 'white':
+            return -1
+        else:
+            return 1
 
 def main():
     game = Game()
