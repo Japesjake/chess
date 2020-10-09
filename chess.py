@@ -24,10 +24,10 @@ class Graphics:
     def pixelate(tuple):
         x, y = tuple
         return (Board.SQUARE_SIZE * x, Board.SQUARE_SIZE * y)
-    def draw(self):
+    def draw(self):        
         self.draw_board()
         self.draw_pieces()
-        if Game.is_piece_selected():
+        if Game.selected:
             self.draw_selection()
             self.draw_possible_moves()
         self.update()
@@ -64,7 +64,7 @@ class Game:
         board = Board()
         self.set_squares()
         self.set_pieces()
-        while self.running:
+        while self.running:            
             graphics.draw()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -97,20 +97,15 @@ class Game:
     def set_pieces(self):
         self.set_pawns()
     def select_piece(self):
-        for square in self.squares:
-            if square.piece and self.turn == square.piece.color and square.is_clicked():
-                self.selected = square.piece
-    def unselect_pieces(self):
-        for square in self.squares:
-            if square.piece and square.piece.selected == True:
-                square.piece.selected = False
-    @staticmethod
-    def is_piece_selected():
-        return Game.selected
-    def print_if_selected(self):
-        for square in self.squares:
-            if square.piece:
-                print(square.piece.selected)
+        if not Game.selected:
+            for square in self.squares:
+                if square.piece and self.turn == square.piece.color and square.is_clicked():
+                    Game.selected = square.piece
+        else:
+            for square in self.squares:
+                if square.piece and self.turn == square.piece.color and square.is_clicked():
+                    Game.selected = square.piece                
+
     def move_piece(self):
         possible_moves = set()
         for square in self.squares:
