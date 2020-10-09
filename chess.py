@@ -108,11 +108,9 @@ class Game:
 
     def move_piece(self):
         possible_moves = set()
-        for square in self.squares:
-            if square.piece and square.piece.selected:
-                possible_moves = square.piece.possible_moves
-                attacking_piece = square.piece
-                square.piece = None
+            possible_moves = Game.selected.possible_moves
+            attacking_piece = Game.selected
+            Game.selected = None
         for square in self.squares:
             if square.is_clicked() and square.coords in possible_moves:
                 square.piece = attacking_piece
