@@ -24,6 +24,13 @@ class Graphics:
     def pixelate(tuple):
         x, y = tuple
         return (Board.SQUARE_SIZE * x, Board.SQUARE_SIZE * y)
+    def draw(self):
+        self.draw_board()
+        self.draw_pieces()
+        if Game.is_piece_selected():
+            self.draw_selection()
+            self.draw_possible_moves()
+        self.update()
     def draw_pieces(self):
         for square in Game.squares:
             if square.piece:
@@ -61,19 +68,16 @@ class Game:
         self.set_squares()
         self.set_pieces()
         while self.running:
-            graphics.draw_board()
-            graphics.draw_pieces()
-            if self.is_piece_selected():
-                graphics.draw_selection()
-                graphics.draw_possible_moves()
-            graphics.update()
+            graphics.draw()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.move_piece()
+                        graphics.draw()
                         self.select_piece()
+                        graphics.draw()
                         # self.print_if_selected()
 
 
@@ -106,8 +110,9 @@ class Game:
         for square in self.squares:
             if square.piece and square.piece.selected == True:
                 square.piece.selected = False
-    def is_piece_selected(self):
-        for square in self.squares:
+    @staticmethod
+    def is_piece_selected():
+        for square in Game.squares:
             if square.piece and square.piece.selected:
                 return True
         return False
