@@ -46,19 +46,16 @@ class Graphics:
                 x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
                 pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
     def draw_selection(self):
-        for square in Game.squares:
-            if square.piece and square.piece.selected:
-                x_pixel, y_pixel = self.pixelate(square.coords)
-                pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
+        x_pixel, y_pixel = self.pixelate(Game.selected.location)
+        pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
     def draw_possible_moves(self):
-        for square in Game.squares:
-            if square.piece and square.piece.selected:
-                for coords in square.piece.possible_moves:
-                    x_pixel, y_pixel = self.pixelate(coords)
-                    pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
+        for coords in Game.selected.possible_moves:
+            x_pixel, y_pixel = self.pixelate(coords)
+            pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
 
 class Game:
     squares = set()
+    selected = None
     def __init__(self):
         self.running = True
         self.turn = 'white'
@@ -74,10 +71,10 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.move_piece()
-                        graphics.draw()
+                        # self.move_piece()
+                        # graphics.draw()
                         self.select_piece()
-                        graphics.draw()
+                        # graphics.draw()
                         # self.print_if_selected()
 
 
@@ -102,20 +99,14 @@ class Game:
     def select_piece(self):
         for square in self.squares:
             if square.piece and self.turn == square.piece.color and square.is_clicked():
-                selected_before_reset = square.piece.selected
-                self.unselect_pieces()
-                square.piece.selected = not selected_before_reset
-                square.piece.update_possible_moves()
+                self.selected = square.piece
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
                 square.piece.selected = False
     @staticmethod
     def is_piece_selected():
-        for square in Game.squares:
-            if square.piece and square.piece.selected:
-                return True
-        return False
+        return Game.selected
     def print_if_selected(self):
         for square in self.squares:
             if square.piece:
@@ -160,7 +151,6 @@ class Piece:
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
         self.location = location
         self.possible_moves = set()
-        self.selected = False
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
