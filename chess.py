@@ -14,6 +14,7 @@ class Graphics:
     GREEN = (0,255,0)
     DARK_GREEN = (0,100,0)
     TAN = (210,180,140)
+    YELLOW = (255,255,0)
     def __init__(self):
         self.init = pg.init()
         self.set_caption = pg.display.set_caption("Chess")
@@ -42,6 +43,12 @@ class Graphics:
             if square.piece and square.piece.selected:
                 x_pixel, y_pixel = self.pixelate(square.coords)
                 pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
+    def draw_possible_moves(self):
+        for square in Game.squares:
+            if square.piece and square.piece.selected:
+                for coords in square.piece.possible_moves:
+                    x_pixel, y_pixel = self.pixelate(coords)
+                    pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
 
 class Game:
     squares = set()
@@ -58,14 +65,17 @@ class Game:
             graphics.draw_pieces()
             if self.is_piece_selected():
                 graphics.draw_selection()
+                graphics.draw_possible_moves()
             graphics.update()
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.move_piece()
                         self.select_piece()
                         # self.print_if_selected()
+
 
 
     def set_squares(self):
@@ -105,6 +115,17 @@ class Game:
         for square in self.squares:
             if square.piece:
                 print(square.piece.selected)
+    def move_piece(self):
+        possible_moves = set()
+        for square in self.squares:
+            if square.piece and square.piece.selected:
+                possible_moves = square.piece.possible_moves
+                attacking_piece = square.piece
+                square.piece = None
+        for square in self.squares:
+            if square.is_clicked() and square.coords in possible_moves:
+                square.piece = attacking_piece
+                square.piece.location = square.coords
 
 class Board:
     WIDTH = 8
@@ -140,10 +161,11 @@ class Pawn(Piece):
     def __init__(self, name, color, location):
         Piece.__init__(self, name, color, location)
     def update_possible_moves(self):
+        self.possible_moves = set()
         x_piece, y_piece = self.location
         for square in Game.squares:
             x_square, y_square = square.coords
-            if self.is_forward_empty() and x_piece == x_square and y_piece + self.direction() == y_square:
+            if x_piece == x_square and y_piece + self.direction() == y_square:
                 self.possible_moves.add(square.coords)
                 print(self.possible_moves)
     def is_forward_empty(self):
