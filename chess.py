@@ -75,10 +75,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.move_piece()
-                        # graphics.draw()
                         self.select_piece()
-                        # graphics.draw()
-                        # self.print_if_selected()
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -109,7 +106,7 @@ class Game:
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
                 # square.piece.update_possible_captures()
-                # print(square.piece.possible_captures)
+                print(square.piece.possible_moves)
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -193,8 +190,9 @@ class Pawn(Piece):
                 x_possible_square, y_possible_square = square.coords
                 if not square.piece:
                     if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
-                        self.possible_moves.add(square.coords)    
-                    if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location:
+                        self.possible_moves.add(square.coords)
+                    # print(x_piece == x_possible_square,y_piece + self.direction_vertical() * 2 == y_possible_square,self.origin == self.location,self.return_square_behind(),self.return_square_behind().piece)     
+                    if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location and self.return_square_behind() and self.return_square_behind().piece:
                         self.possible_moves.add(square.coords) 
                 # Adds capture possibilities (left)
                     direction_x, direction_y = self.diagonal_direction_left()
@@ -220,11 +218,11 @@ class Pawn(Piece):
         for square in Game.squares:
             x_selected, y_selected = square.coords
             x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
-            for square in Game.squares:
-                if square.coords == (x_forward, y_forward):
-                    if square.piece:
-                        return False
-                    return True 
+        for square in Game.squares:
+            if square.coords == (x_forward, y_forward):
+                if square.piece:
+                    return False
+                return True 
     def direction_vertical(self):
         if self.color == 'white':
             return -1
@@ -240,6 +238,14 @@ class Pawn(Piece):
             return (1, -1)
         else:
             return (1, 1)              
+    def return_square_behind(self):
+        for square in Game.squares:
+            if square.piece and square.piece.selected:
+                x_selected, y_selected = square.coords
+                x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
+                for square in Game.squares:
+                    if square.coords == (x_forward, y_forward):
+                        return square
 
 def main():
     game = Game()
