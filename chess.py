@@ -3,6 +3,8 @@ import os
 
 # All icons made by Freepik from www.flaticon.com
 
+# To do: fix bug where pawns jump pieces at origin
+
 class Graphics:
     HEIGHT = 800
     WIDTH = 800
