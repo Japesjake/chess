@@ -100,6 +100,8 @@ class Game:
         for square in self.squares:
             if square.coords == (5,5):
                 square.piece = Pawn('pawn', 'black', square.coords)
+            if square.coords == (4,5):
+                square.piece = Pawn('pawn', 'white', square.coords)
     def set_pieces(self):
         self.set_pawns()
     def select_piece(self):
@@ -109,8 +111,8 @@ class Game:
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
-                square.piece.update_possible_captures()
-                print(square.piece.possible_captures)
+                # square.piece.update_possible_captures()
+                # print(square.piece.possible_captures)
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -171,38 +173,72 @@ class Piece:
         self.possible_moves = set()
         self.possible_captures = set()
         self.selected = False
+    def update_possible_moves(self):
+        if callable(getattr(self, "update_possible_moves_pawn", None)):
+            self.update_possible_moves_pawn()
+        else:            
+            self.possible_moves = set()
+            x_piece, y_piece = self.location
+            for square in Game.squares:
+                x_possible_square, y_possible_square = square.coords
+                if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
+                    self.possible_moves.add(square.coords)
+    # def update_possible_captures(self):
+    #     if callable(getattr(self, "update_possible_captures_pawn", None)):
+    #         self.update_possible_captures_pawn()        
+    #     else:    
+    #         self.possible_captures = set()
+    #         for square in Game.squares:
+    #             if square.piece and square.piece.color != Game.turn and square.coords in self.possible_moves:
+    #                 self.possible_captures.add(square.coords)
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
         Piece.__init__(self, name, color, location)
-    def update_possible_moves(self):
-        self.possible_moves = set()
-        x_piece, y_piece = self.location
-        for square in Game.squares:
-            x_square, y_square = square.coords
-            if x_piece == x_square and y_piece + self.direction() == y_square:
-                self.possible_moves.add(square.coords)
-                print(self.possible_moves)
+    def update_possible_moves_pawn(self):
+            self.possible_moves = set()
+            self.possible_captures = set()
+            x_piece, y_piece = self.location
+            for square in Game.squares:
+                x_possible_square, y_possible_square = square.coords
+                if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
+                    self.possible_moves.add(square.coords)
+                direction_x, direction_y = self.diagonal_direction_left()
+                if square.piece and square.piece.color != Game.turn:
+                    if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
+                        self.possible_moves.add(square.coords)
+                        self.possible_captures.add(square.coords)
+                    direction_x, direction_y = self.diagonal_direction_right()
+                    if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
+                        self.possible_moves.add(square.coords)
+                        self.possible_captures.add(square.coords)                
+    # def update_possible_captures_pawn(self):
+        # self.possible_moves.remove(square.coords)
+
     def is_forward_empty(self):
         for square in Game.squares:
             x_selected, y_selected = square.coords
-            x_forward, y_forward = x_selected, y_selected + self.direction()
+            x_forward, y_forward = x_selected, y_selected + self.direction_vertical()
             for square in Game.squares:
                 if square.coords == (x_forward, y_forward):
                     if square.piece:
                         return False
                     return True 
-    def direction(self):
+    def direction_vertical(self):
         if self.color == 'white':
             return -1
         else:
             return 1
-    def update_possible_captures(self):
-        self.possible_captures = set()
-        for square in Game.squares:
-            if square.piece and square.piece.color != Game.turn and square.coords in self.possible_moves:
-                self.possible_captures.add(square.coords)
-                self.possible_moves.remove(square.coords)
+    def diagonal_direction_left(self):
+        if self.color == 'white':
+            return (-1, -1)
+        else:
+            return (-1, 1)
+    def diagonal_direction_right(self):
+        if self.color == 'white':
+            return (1, -1)
+        else:
+            return (1, 1)              
 
 def main():
     game = Game()
