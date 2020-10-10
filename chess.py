@@ -79,9 +79,6 @@ class Game:
                         self.select_piece()
                         # graphics.draw()
                         # self.print_if_selected()
-
-
-
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -170,6 +167,7 @@ class Piece:
         self.color = color
         self.image = pg.transform.scale(pg.image.load(os.path.join('pngs', self.name + '_' + self.color + '.png')), (Board.SQUARE_SIZE, Board.SQUARE_SIZE))
         self.location = location
+        self.origin = location
         self.possible_moves = set()
         self.possible_captures = set()
         self.selected = False
@@ -195,21 +193,33 @@ class Pawn(Piece):
                 x_possible_square, y_possible_square = square.coords
                 if not square.piece:
                     if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
-                        self.possible_moves.add(square.coords)
+                        self.possible_moves.add(square.coords)    
+                    if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location:
+                        self.possible_moves.add(square.coords) 
+                # Adds capture possibilities (left)
                     direction_x, direction_y = self.diagonal_direction_left()
                 if square.piece and square.piece.color != Game.turn:
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
                         self.possible_captures.add(square.coords)
+                # Adds capture possibilities (Right)
                     direction_x, direction_y = self.diagonal_direction_right()
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
                         self.possible_captures.add(square.coords)
-
     def is_forward_empty(self):
         for square in Game.squares:
             x_selected, y_selected = square.coords
             x_forward, y_forward = x_selected, y_selected + self.direction_vertical()
+            for square in Game.squares:
+                if square.coords == (x_forward, y_forward):
+                    if square.piece:
+                        return False
+                    return True 
+    def is_behind_empty(self):
+        for square in Game.squares:
+            x_selected, y_selected = square.coords
+            x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
             for square in Game.squares:
                 if square.coords == (x_forward, y_forward):
                     if square.piece:
