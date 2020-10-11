@@ -77,8 +77,9 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
-                        # self.move_piece()
                         print(self.is_piece_selected())
+                        # self.move_piece()
+
                         # self.print_possible_moves()
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
@@ -113,7 +114,9 @@ class Game:
             if square.coords == (1,0):
                 square.piece = Rook('rook','white', square.coords)
             if square.coords == (4,4):
-                square.piece = Rook('rook','white', square.coords)                
+                square.piece = Rook('rook','white', square.coords)
+            if square.coords == (2,4):
+                square.piece = Rook('rook','white', square.coords)                    
     def set_pieces(self):
         # self.set_pawns()
         self.set_rooks()
@@ -256,27 +259,50 @@ class Rook(Piece):
     def update_possible_moves(self):
         self.possible_moves = set()
         x_piece, y_piece = self.location
-        x_right_len = Board.WIDTH - x_piece - 1
-        x_left_len = Board.WIDTH - x_right_len - 1
-        y_up_len = Board.WIDTH - y_piece - 1
-        y_down_len = Board.WIDTH - y_up_len - 1
+        # x_right_len = Board.WIDTH - x_piece - 1
+        # x_left_len = Board.WIDTH - x_right_len - 1
+        # y_up_len = Board.WIDTH - y_piece - 1
+        # y_down_len = Board.WIDTH - y_up_len - 1
         for square in Game.squares:
-            # Adds possible moves to the right
-            for x in range(x_piece, x_right_len):
-                if square.coords == (x, y_piece):
-                    self.possible_moves.add((x, y_piece))
+            for x in range(x_piece, Board.WIDTH):
+                if not square.piece:
+                    if square.coords == (x, y_piece):
+                        self.possible_moves.add((x, y_piece))
+                elif square.piece.color != Game.turn:
+                    if square.coords == (x, y_piece):
+                        self.possible_moves.add((x, y_piece))
+                if square.piece:
+                    break
             # Adds possible moves to the left            
-            for x in range(x_left_len,x_piece,-1):
-                if square.coords == (x,y_piece):
-                    self.possible_moves.add((x,y_piece))
+            for x in range(x_piece - 1,-1, -1):
+                if not square.piece:
+                    if square.coords == (x,y_piece):
+                        self.possible_moves.add((x,y_piece))
+                elif square.piece.color != Game.turn:
+                    if square.coords == (x,y_piece):
+                        self.possible_moves.add((x,y_piece))
+                if square.piece:
+                    break
             # Adds possible moves up
-            for y in range(y_piece, y_up_len):
-                if square.coords == (x_piece,y):                
-                    self.possible_moves.add((x_piece,y))
+            for y in range(y_piece - 1, -1, -1):
+                if not square.piece:
+                    if square.coords == (x_piece,y):                
+                        self.possible_moves.add((x_piece,y))
+                elif square.piece.color != Game.turn:
+                    if square.coords == (x_piece,y):                
+                        self.possible_moves.add((x_piece,y))
+                if square.piece:
+                    break
             # Adds possible moves down
-            for y in range(y_down_len,y_piece,-1):
-                if square.coords == (x_piece,y):                
-                    self.possible_moves.add((x_piece,y))
+            for y in range(y_piece,Board.WIDTH):
+                if not square.piece:
+                    if square.coords == (x_piece,y):                
+                        self.possible_moves.add((x_piece,y))
+                elif square.piece.color != Game.turn:
+                    if square.coords == (x_piece,y):                
+                        self.possible_moves.add((x_piece,y))
+                if square.piece:
+                    break
         print(self.possible_moves)
 def main():
     game = Game()
