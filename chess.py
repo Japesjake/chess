@@ -76,9 +76,10 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.select_piece()
                         self.move_piece()
                         # graphics.draw()
-                        self.select_piece()
+                        # print(self.is_piece_selected())
                         # graphics.draw()
                         # self.print_if_selected()
     def set_squares(self):
@@ -110,8 +111,6 @@ class Game:
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
-                # square.piece.update_possible_captures()
-                # print(square.piece.possible_captures)
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -134,13 +133,17 @@ class Game:
                 attacking_piece = square.piece
                 attacking_square = square
         for square in self.squares:
-            if square.is_clicked() and square.coords in possible_moves:
+            if square.is_clicked() and square.coords in possible_moves and attacking_piece.color == Game.turn:
                 attacking_square.piece = None               
                 square.piece = attacking_piece
                 square.piece.location = square.coords
-                # graphics = Graphics()
-                # graphics.draw_board()
-                # graphics.update() 
+                self.unselect_pieces()
+                self.change_turns()
+    def change_turns(self):
+        if Game.turn == "white":
+            Game.turn = "black"
+        else:
+            Game.turn = "white"
 
 class Board:
     WIDTH = 8
