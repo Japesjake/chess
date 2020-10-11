@@ -3,6 +3,8 @@ import os
 
 # All icons made by Freepik from www.flaticon.com
 
+# To do: fix bug where pawns jump pieces at origin
+
 class Graphics:
     HEIGHT = 800
     WIDTH = 800
@@ -74,8 +76,13 @@ class Game:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.select_piece()
                         self.move_piece()
                         self.select_piece()
+                        # graphics.draw()
+                        # print(self.is_piece_selected())
+                        # graphics.draw()
+                        # self.print_if_selected()
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -128,13 +135,17 @@ class Game:
                 attacking_piece = square.piece
                 attacking_square = square
         for square in self.squares:
-            if square.is_clicked() and square.coords in possible_moves:
+            if square.is_clicked() and square.coords in possible_moves and attacking_piece.color == Game.turn:
                 attacking_square.piece = None               
                 square.piece = attacking_piece
                 square.piece.location = square.coords
-                # graphics = Graphics()
-                # graphics.draw_board()
-                # graphics.update() 
+                self.unselect_pieces()
+                self.change_turns()
+    def change_turns(self):
+        if Game.turn == "white":
+            Game.turn = "black"
+        else:
+            Game.turn = "white"
 
 class Board:
     WIDTH = 8
