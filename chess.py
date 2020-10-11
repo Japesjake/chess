@@ -77,7 +77,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
-                        print(self.is_piece_selected())
+                        # print(self.is_piece_selected())
                         # self.move_piece()
 
                         # self.print_possible_moves()
@@ -263,6 +263,7 @@ class Rook(Piece):
         # x_left_len = Board.WIDTH - x_right_len - 1
         # y_up_len = Board.WIDTH - y_piece - 1
         # y_down_len = Board.WIDTH - y_up_len - 1
+        obstruction = False
         for square in Game.squares:
             for x in range(x_piece, Board.WIDTH):
                 if not square.piece:
@@ -271,9 +272,17 @@ class Rook(Piece):
                 elif square.piece.color != Game.turn:
                     if square.coords == (x, y_piece):
                         self.possible_moves.add((x, y_piece))
-                if square.piece:
-                    break
-            # Adds possible moves to the left            
+                elif square.piece and square.piece.color == Game.turn:
+                    if square.coords == (x, y_piece):                    
+                        obstruction = True
+                        break
+            if obstruction:
+                print(self.possible_moves)
+                break
+                
+            # Adds possible moves to the left
+        obstruction = False
+        for square in Game.squares:            
             for x in range(x_piece - 1,-1, -1):
                 if not square.piece:
                     if square.coords == (x,y_piece):
@@ -281,9 +290,16 @@ class Rook(Piece):
                 elif square.piece.color != Game.turn:
                     if square.coords == (x,y_piece):
                         self.possible_moves.add((x,y_piece))
-                if square.piece:
-                    break
+                elif square.piece and square.piece.color == Game.turn:
+                    if square.coords == (x, y_piece):                    
+                        obstruction = True
+                        break
+            if obstruction:
+                print(self.possible_moves)
+                break
             # Adds possible moves up
+        obstruction = False
+        for square in Game.squares:
             for y in range(y_piece - 1, -1, -1):
                 if not square.piece:
                     if square.coords == (x_piece,y):                
@@ -291,9 +307,16 @@ class Rook(Piece):
                 elif square.piece.color != Game.turn:
                     if square.coords == (x_piece,y):                
                         self.possible_moves.add((x_piece,y))
-                if square.piece:
-                    break
+                elif square.piece and square.piece.color == Game.turn:
+                    if square.coords == (x_piece, y):                    
+                        obstruction = True
+                        break
+            if obstruction:
+                print(self.possible_moves)
+                break
             # Adds possible moves down
+        obstruction = False
+        for square in Game.squares:
             for y in range(y_piece,Board.WIDTH):
                 if not square.piece:
                     if square.coords == (x_piece,y):                
@@ -301,8 +324,13 @@ class Rook(Piece):
                 elif square.piece.color != Game.turn:
                     if square.coords == (x_piece,y):                
                         self.possible_moves.add((x_piece,y))
-                if square.piece:
-                    break
+                elif square.piece and square.piece.color == Game.turn:
+                    if square.coords == (x_piece, y):                    
+                        obstruction = True
+                        break
+            if obstruction:
+                print(self.possible_moves)
+                break
         print(self.possible_moves)
 def main():
     game = Game()
