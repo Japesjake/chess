@@ -78,7 +78,6 @@ class Game:
                     if event.button == 1:
                         self.select_piece()
                         self.move_piece()
-                        self.select_piece()
                         # graphics.draw()
                         # print(self.is_piece_selected())
                         # graphics.draw()
@@ -112,7 +111,6 @@ class Game:
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
-                print(square.piece.possible_moves)
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -167,47 +165,7 @@ class Square:
         if square_x <= mouse_x <= square_x + Board.SQUARE_SIZE and square_y <= mouse_y <= square_y + Board.SQUARE_SIZE:
             return True
         return False
-    def is_forward_empty(self):
-        for square in Game.squares:
-            x_selected, y_selected = square.coords
-            x_forward, y_forward = x_selected, y_selected + self.direction_vertical()
-            for square in Game.squares:
-                if square.coords == (x_forward, y_forward):
-                    if square.piece:
-                        return False
-                    return True 
-    def is_behind_empty(self):
-        for square in Game.squares:
-            x_selected, y_selected = square.coords
-            x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
-        for square in Game.squares:
-            if square.coords == (x_forward, y_forward):
-                if square.piece:
-                    return False
-                return True 
-    def direction_vertical(self):
-        if self.piece.color == 'white':
-            return -1
-        else:
-            return 1
-    def diagonal_direction_left(self):
-        if self.piece.color == 'white':
-            return (-1, -1)
-        else:
-            return (-1, 1)
-    def diagonal_direction_right(self):
-        if self.piece.color == 'white':
-            return (1, -1)
-        else:
-            return (1, 1)              
-    def return_square_behind(self):
-        for square in Game.squares:
-            if square.piece and square.piece.selected:
-                x_selected, y_selected = square.coords
-                x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
-                for square in Game.squares:
-                    if square.coords == (x_forward, y_forward):
-                        return square        
+        
 class Piece:
     def __init__(self, name, color, location):
         self.name = name
@@ -236,30 +194,57 @@ class Pawn(Piece):
             self.possible_moves = set()
             self.possible_captures = set()
             x_piece, y_piece = self.location
-            if Game.is_piece_selected():
-                for square in Game.squares:
-                    if square.piece and square.piece.selected:
-                        square_selected = square
-                for square in Game.squares:
-                    x_possible_square, y_possible_square = square.coords
-                # Pawn regular movement
-                    if not square.piece and x_piece == x_possible_square and y_piece + square_selected.direction_vertical() == y_possible_square:
-                        self.possible_moves.add(square.coords)
-                # Pawn double move from original position
-                    print(x_piece == x_possible_square,y_piece + square_selected.direction_vertical() * 2 == y_possible_square,square_selected.piece.origin == square_selected.piece.location,square.return_square_behind(),square.return_square_behind().piece)     
-                    if square.piece and x_piece == x_possible_square and y_piece + square_selected.direction_vertical() * 2 == y_possible_square and square_selected.piece.origin == square_selected.piece.location and square.return_square_behind() and square.return_square_behind().piece:
+            for square in Game.squares:
+                x_possible_square, y_possible_square = square.coords
+                if not square.piece:
+                    if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
+                        self.possible_moves.add(square.coords)    
+                    if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location:
                         self.possible_moves.add(square.coords) 
-                    # Adds capture possibilities (left)
-                    direction_x, direction_y = square_selected.diagonal_direction_left()
-                    if square.piece and square.piece.color != Game.turn:
-                        if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
-                            self.possible_moves.add(square.coords)
-                            self.possible_captures.add(square.coords)
-                    # Adds capture possibilities (Right)
-                        direction_x, direction_y = square_selected.diagonal_direction_right()
-                        if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
-                            self.possible_moves.add(square.coords)
-                            self.possible_captures.add(square.coords)
+                # Adds capture possibilities (left)
+                    direction_x, direction_y = self.diagonal_direction_left()
+                if square.piece and square.piece.color != Game.turn:
+                    if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
+                        self.possible_moves.add(square.coords)
+                        self.possible_captures.add(square.coords)
+                # Adds capture possibilities (Right)
+                    direction_x, direction_y = self.diagonal_direction_right()
+                    if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
+                        self.possible_moves.add(square.coords)
+                        self.possible_captures.add(square.coords)
+    def is_forward_empty(self):
+        for square in Game.squares:
+            x_selected, y_selected = square.coords
+            x_forward, y_forward = x_selected, y_selected + self.direction_vertical()
+            for square in Game.squares:
+                if square.coords == (x_forward, y_forward):
+                    if square.piece:
+                        return False
+                    return True 
+    def is_behind_empty(self):
+        for square in Game.squares:
+            x_selected, y_selected = square.coords
+            x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
+            for square in Game.squares:
+                if square.coords == (x_forward, y_forward):
+                    if square.piece:
+                        return False
+                    return True 
+    def direction_vertical(self):
+        if self.color == 'white':
+            return -1
+        else:
+            return 1
+    def diagonal_direction_left(self):
+        if self.color == 'white':
+            return (-1, -1)
+        else:
+            return (-1, 1)
+    def diagonal_direction_right(self):
+        if self.color == 'white':
+            return (1, -1)
+        else:
+            return (1, 1)              
 
 def main():
     game = Game()
