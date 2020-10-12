@@ -117,9 +117,15 @@ class Game:
                 square.piece = Rook('rook','black', square.coords)
             if square.coords == (2,4):
                 square.piece = Rook('rook','white', square.coords)                    
+    def set_knights(self):
+        for square in Game.squares:
+            if square.coords == (3,2):
+                square.piece = Knight('knight', 'white', square.coords)
+
     def set_pieces(self):
         self.set_pawns()
         self.set_rooks()
+        self.set_knights()
     def select_piece(self):
         for square in self.squares:
             if square.piece and Game.turn == square.piece.color and square.is_clicked():
@@ -283,6 +289,36 @@ class Rook(Piece):
         for y in range(y_piece + 1,Board.WIDTH):
             if update_possible_move(x_piece, y):
                 break
+
+class Knight(Piece):
+    def __init__(self, name, color, location):
+        Piece.__init__(self, name, color, location)
+    def update_possible_moves(self):
+        self.possible_moves = set()
+        x_piece, y_piece = self.location
+        # Direction listed first is one square away from location
+        # e.g. #UR = Upper Right or up one, right two
+        factors_set = set()
+        factors_set.add((2, -1))  #UR
+        factors_set.add((1, -2))  #RU
+        factors_set.add((-2, -1)) #UL
+        factors_set.add((-1, -2)) #LU
+        factors_set.add((2, 1))   #DR
+        factors_set.add((1, 2))   #RD
+        factors_set.add((-2 ,1))  #DL
+        factors_set.add((-1, 2))  #LD
+        def update_possible_move(factors):
+            x_factor, y_factor = factors
+            for square in Game.squares:
+                x_possible_square, y_possible_square = square.coords
+                # if square.piece:
+                if square.piece and square.piece.color == Game.turn:
+                    pass
+                elif x_piece == x_possible_square - x_factor:
+                    if y_piece == y_possible_square - y_factor:
+                        self.possible_moves.add((square.coords))
+        for factors in factors_set:
+            update_possible_move(factors)
         print(self.possible_moves)
 def main():
     game = Game()
