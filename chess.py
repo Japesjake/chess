@@ -51,13 +51,15 @@ class Graphics:
         for square in Game.squares:
             if square.piece and square.piece.selected:
                 x_pixel, y_pixel = self.pixelate(square.coords)
-                pg.draw.rect(self.screen,self.GREEN,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
+                # pg.draw.rect(self.screen,self.GREEN,(x_pixel + 5, y_pixel + 5, Board.SQUARE_SIZE - 10,Board.SQUARE_SIZE - 10),5)
+                pg.draw.circle(self.screen,self.GREEN, (x_pixel + int(Board.SQUARE_SIZE / 2), y_pixel + int(Board.SQUARE_SIZE / 2)), 5)
     def draw_possible_moves(self):
         for square in Game.squares:
             if square.piece and square.piece.selected:
                 for coords in square.piece.possible_moves:
                     x_pixel, y_pixel = self.pixelate(coords)
-                    pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
+                    pg.draw.rect(self.screen,self.YELLOW,(x_pixel + 1, y_pixel + 1, Board.SQUARE_SIZE - 2,Board.SQUARE_SIZE - 2),5)
+                    # pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
 
 class Game:
     squares = set()
@@ -77,10 +79,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.select_piece()
-                        # print(self.is_piece_selected())
                         self.move_piece()
-
-                        # self.print_possible_moves()
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -211,6 +210,7 @@ class Piece:
         self.possible_moves = set()
         self.possible_captures = set()
         self.selected = False
+        self.update_possible_moves()
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
