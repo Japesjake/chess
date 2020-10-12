@@ -121,11 +121,15 @@ class Game:
         for square in Game.squares:
             if square.coords == (3,2):
                 square.piece = Knight('knight', 'white', square.coords)
-
+    def set_bishops(self):
+        for square in Game.squares:
+            if square.coords == (3, 3):
+                square.piece = Bishop('bishop', 'white', square.coords)
     def set_pieces(self):
         self.set_pawns()
         self.set_rooks()
         self.set_knights()
+        self.set_bishops()
     def select_piece(self):
         for square in self.squares:
             if square.piece and Game.turn == square.piece.color and square.is_clicked():
@@ -320,6 +324,37 @@ class Knight(Piece):
         for factors in factors_set:
             update_possible_move(factors)
         print(self.possible_moves)
+
+class Bishop(Piece):
+    def __init__(self, name, color, location):
+        Piece.__init__(self, name, color, location)
+    def update_possible_moves(self):
+        self.possible_moves = set()
+        x_piece, y_piece = self.location
+        def update_possible_move(x_coord, y_coord):
+            for square in Game.squares:
+                if square.coords == (x_coord, y_coord):
+                    if square.piece and square.piece.color == Game.turn:
+                        return True
+                    self.possible_moves.add((x_coord, y_coord))
+                    if square.piece and square.piece.color != Game.turn:
+                        return True
+        # Adds possible moves in the upper right direction
+        for x, y in zip(range(x_piece + 1, Board.WIDTH), range(y_piece - 1, -1, -1)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the upper left direction
+        for x, y in zip(range(x_piece - 1,-1, -1), range(y_piece - 1, -1, -1)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the lower right direction
+        for x, y in zip(range(x_piece + 1, Board.WIDTH), range(y_piece + 1,Board.WIDTH)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the lower left direction
+        for x, y in zip(range(x_piece - 1,-1, -1), range(y_piece + 1,Board.WIDTH)):
+            if update_possible_move(x, y):
+                break                
 def main():
     game = Game()
     game.run()
