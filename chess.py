@@ -114,7 +114,7 @@ class Game:
             if square.coords == (1,0):
                 square.piece = Rook('rook','white', square.coords)
             if square.coords == (4,4):
-                square.piece = Rook('rook','white', square.coords)
+                square.piece = Rook('rook','black', square.coords)
             if square.coords == (2,4):
                 square.piece = Rook('rook','white', square.coords)                    
     def set_pieces(self):
@@ -259,77 +259,29 @@ class Rook(Piece):
     def update_possible_moves(self):
         self.possible_moves = set()
         x_piece, y_piece = self.location
-        # x_right_len = Board.WIDTH - x_piece - 1
-        # x_left_len = Board.WIDTH - x_right_len - 1
-        # y_up_len = Board.WIDTH - y_piece - 1
-        # y_down_len = Board.WIDTH - y_up_len - 1
-        obstruction = False
-        for square in Game.squares:
-            for x in range(x_piece, Board.WIDTH):
-                if not square.piece:
-                    if square.coords == (x, y_piece):
-                        self.possible_moves.add((x, y_piece))
-                elif square.piece.color != Game.turn:
-                    if square.coords == (x, y_piece):
-                        self.possible_moves.add((x, y_piece))
-                elif square.piece and square.piece.color == Game.turn:
-                    if square.coords == (x, y_piece):                    
-                        obstruction = True
-                        break
-            if obstruction:
-                print(self.possible_moves)
+        def update_possible_move(x_coord, y_coord):
+            for square in Game.squares:
+                if square.coords == (x_coord, y_coord):
+                    if square.piece and square.piece.color == Game.turn:
+                        return True
+                    self.possible_moves.add((x_coord, y_coord))
+                    if square.piece and square.piece.color != Game.turn:
+                        return True
+        #Adds possible moves to the right
+        for x in range(x_piece + 1, Board.WIDTH):
+            if update_possible_move(x, y_piece):
                 break
-                
-            # Adds possible moves to the left
-        obstruction = False
-        for square in Game.squares:            
-            for x in range(x_piece - 1,-1, -1):
-                if not square.piece:
-                    if square.coords == (x,y_piece):
-                        self.possible_moves.add((x,y_piece))
-                elif square.piece.color != Game.turn:
-                    if square.coords == (x,y_piece):
-                        self.possible_moves.add((x,y_piece))
-                elif square.piece and square.piece.color == Game.turn:
-                    if square.coords == (x, y_piece):                    
-                        obstruction = True
-                        break
-            if obstruction:
-                print(self.possible_moves)
+        # Adds possible moves to the left           
+        for x in range(x_piece - 1,-1, -1):
+            if update_possible_move(x, y_piece):
                 break
-            # Adds possible moves up
-        obstruction = False
-        for square in Game.squares:
-            for y in range(y_piece - 1, -1, -1):
-                if not square.piece:
-                    if square.coords == (x_piece,y):                
-                        self.possible_moves.add((x_piece,y))
-                elif square.piece.color != Game.turn:
-                    if square.coords == (x_piece,y):                
-                        self.possible_moves.add((x_piece,y))
-                elif square.piece and square.piece.color == Game.turn:
-                    if square.coords == (x_piece, y):                    
-                        obstruction = True
-                        break
-            if obstruction:
-                print(self.possible_moves)
+        # Adds possible moves up
+        for y in range(y_piece - 1, -1, -1):
+            if update_possible_move(x_piece, y):
                 break
-            # Adds possible moves down
-        obstruction = False
-        for square in Game.squares:
-            for y in range(y_piece,Board.WIDTH):
-                if not square.piece:
-                    if square.coords == (x_piece,y):                
-                        self.possible_moves.add((x_piece,y))
-                elif square.piece.color != Game.turn:
-                    if square.coords == (x_piece,y):                
-                        self.possible_moves.add((x_piece,y))
-                elif square.piece and square.piece.color == Game.turn:
-                    if square.coords == (x_piece, y):                    
-                        obstruction = True
-                        break
-            if obstruction:
-                print(self.possible_moves)
+        # Adds possible moves down
+        for y in range(y_piece + 1,Board.WIDTH):
+            if update_possible_move(x_piece, y):
                 break
         print(self.possible_moves)
 def main():
