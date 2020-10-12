@@ -125,11 +125,21 @@ class Game:
         for square in Game.squares:
             if square.coords == (3, 3):
                 square.piece = Bishop('bishop', 'white', square.coords)
+    def set_queens(self):
+        for square in Game.squares:
+            if square.coords == (4, 2):
+                square.piece = Queen('queen', 'white', square.coords)
+    def set_kings(self):
+        for square in Game.squares:
+            if square.coords == (4, 3):
+                square.piece = King('king', 'white', square.coords)
     def set_pieces(self):
         self.set_pawns()
         self.set_rooks()
         self.set_knights()
         self.set_bishops()
+        self.set_queens()
+        self.set_kings()
     def select_piece(self):
         for square in self.squares:
             if square.piece and Game.turn == square.piece.color and square.is_clicked():
@@ -355,6 +365,83 @@ class Bishop(Piece):
         for x, y in zip(range(x_piece - 1,-1, -1), range(y_piece + 1,Board.WIDTH)):
             if update_possible_move(x, y):
                 break                
+
+class Queen(Piece):
+    def __init__(self, name, color, location):
+        Piece.__init__(self, name, color, location)
+    def update_possible_moves(self):
+        self.possible_moves = set()
+        x_piece, y_piece = self.location
+        def update_possible_move(x_coord, y_coord):
+            for square in Game.squares:
+                if square.coords == (x_coord, y_coord):
+                    if square.piece and square.piece.color == Game.turn:
+                        return True
+                    self.possible_moves.add((x_coord, y_coord))
+                    if square.piece and square.piece.color != Game.turn:
+                        return True
+                # Adds possible moves in the upper right direction
+        for x, y in zip(range(x_piece + 1, Board.WIDTH), range(y_piece - 1, -1, -1)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the upper left direction
+        for x, y in zip(range(x_piece - 1,-1, -1), range(y_piece - 1, -1, -1)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the lower right direction
+        for x, y in zip(range(x_piece + 1, Board.WIDTH), range(y_piece + 1,Board.WIDTH)):
+            if update_possible_move(x, y):
+                break
+        # Adds possible moves in the lower left direction
+        for x, y in zip(range(x_piece - 1,-1, -1), range(y_piece + 1,Board.WIDTH)):
+            if update_possible_move(x, y):
+                break
+        #Adds possible moves to the right
+        for x in range(x_piece + 1, Board.WIDTH):
+            if update_possible_move(x, y_piece):
+                break
+        # Adds possible moves to the left           
+        for x in range(x_piece - 1,-1, -1):
+            if update_possible_move(x, y_piece):
+                break
+        # Adds possible moves up
+        for y in range(y_piece - 1, -1, -1):
+            if update_possible_move(x_piece, y):
+                break
+        # Adds possible moves down
+        for y in range(y_piece + 1,Board.WIDTH):
+            if update_possible_move(x_piece, y):
+                break
+
+class King(Piece):
+    def __init__(self, name, color, location):
+        Piece.__init__(self, name, color, location)
+    def update_possible_moves(self):
+        self.possible_moves = set()
+        x_piece, y_piece = self.location
+        factors_set = set()
+        factors_set.add((1, -1))  #UR
+        factors_set.add((0, -1))  #U
+        factors_set.add((-1, -1)) #UL
+        factors_set.add((-1, 0))  #L
+        factors_set.add((-1, 1))  #DL
+        factors_set.add((0, 1))   #D
+        factors_set.add((1 ,1))   #DR
+        factors_set.add((1, 0))   #R        
+        def update_possible_move(factors):
+            x_factor, y_factor = factors
+            for square in Game.squares:
+                x_possible_square, y_possible_square = square.coords
+                # if square.piece:
+                if square.piece and square.piece.color == Game.turn:
+                    pass
+                elif x_piece == x_possible_square - x_factor:
+                    if y_piece == y_possible_square - y_factor:
+                        self.possible_moves.add((square.coords))
+        for factors in factors_set:
+            update_possible_move(factors)
+
+
 def main():
     game = Game()
     game.run()
