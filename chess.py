@@ -78,7 +78,7 @@ class Game:
                     if event.button == 1:
                         self.select_piece()
                         # print(self.is_piece_selected())
-                        # self.move_piece()
+                        self.move_piece()
 
                         # self.print_possible_moves()
     def set_squares(self):
@@ -118,7 +118,7 @@ class Game:
             if square.coords == (2,4):
                 square.piece = Rook('rook','white', square.coords)                    
     def set_pieces(self):
-        # self.set_pawns()
+        self.set_pawns()
         self.set_rooks()
     def select_piece(self):
         for square in self.squares:
@@ -209,7 +209,7 @@ class Pawn(Piece):
                     if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location:
                         self.possible_moves.add(square.coords) 
                 # Adds capture possibilities (left)
-                    direction_x, direction_y = self.diagonal_direction_left()
+                direction_x, direction_y = self.diagonal_direction_left()
                 if square.piece and square.piece.color != Game.turn:
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
