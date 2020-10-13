@@ -4,6 +4,7 @@ import os
 # All icons made by Freepik from www.flaticon.com
 
 # To do: fix bug where pawns jump pieces at origin
+# To do: keep king from moving into enemy possible moves
 
 class Graphics:
     HEIGHT = 800
@@ -95,11 +96,6 @@ class Game:
             for square in self.squares:
                 if square.coords == (x_coord, y_coord):
                     square.piece = Pawn('pawn', 'black', square.coords)
-        for square in self.squares:
-            if square.coords == (5,5):
-                square.piece = Pawn('pawn', 'black', square.coords)
-            if square.coords == (4,5):
-                square.piece = Pawn('pawn', 'white', square.coords)
     def set_rooks(self):
         for square in self.squares:
             if square.coords == (0,0):
@@ -109,35 +105,45 @@ class Game:
             if square.coords == (7,7):
                 square.piece = Rook('rook', 'white', square.coords)
             if square.coords == (0,7):
-                square.piece = Rook('rook', 'white', square.coords)
-            if square.coords == (1,0):
-                square.piece = Rook('rook','white', square.coords)
-            if square.coords == (4,4):
-                square.piece = Rook('rook','black', square.coords)
-            if square.coords == (2,4):
-                square.piece = Rook('rook','white', square.coords)                    
+                square.piece = Rook('rook', 'white', square.coords)                 
     def set_knights(self):
         for square in Game.squares:
-            if square.coords == (3,2):
+            if square.coords == (1,7):
                 square.piece = Knight('knight', 'white', square.coords)
+            if square.coords == (6,7):
+                square.piece = Knight('knight', 'white', square.coords)
+            if square.coords == (1,0):
+                square.piece = Knight('knight', 'black', square.coords)
+            if square.coords == (6,0):
+                square.piece = Knight('knight', 'black', square.coords)
     def set_bishops(self):
         for square in Game.squares:
-            if square.coords == (3, 3):
+            if square.coords == (2, 7):
                 square.piece = Bishop('bishop', 'white', square.coords)
+            if square.coords == (5, 7):
+                square.piece = Bishop('bishop', 'white', square.coords)
+            if square.coords == (5, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
+            if square.coords == (2, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
     def set_queens(self):
         for square in Game.squares:
-            if square.coords == (4, 2):
+            if square.coords == (3, 7):
                 square.piece = Queen('queen', 'white', square.coords)
+            if square.coords == (3, 0):
+                square.piece = Queen('queen', 'black', square.coords)
     def set_kings(self):
         for square in Game.squares:
-            if square.coords == (4, 3):
+            if square.coords == (4, 7):
                 square.piece = King('king', 'white', square.coords)
+            if square.coords == (4, 0):
+                square.piece = King('king', 'black', square.coords)
     def set_pieces(self):
-        self.set_pawns()
+        # self.set_pawns()
         self.set_rooks()
-        self.set_knights()
-        self.set_bishops()
-        self.set_queens()
+        # self.set_knights()
+        # self.set_bishops()
+        # self.set_queens()
         self.set_kings()
     def select_piece(self):
         for square in self.squares:
@@ -167,13 +173,49 @@ class Game:
                 possible_moves = square.piece.possible_moves
                 attacking_piece = square.piece
                 attacking_square = square
+                piece_coords = square.coords
         for square in self.squares:
-            if square.is_clicked() and square.coords in possible_moves and attacking_piece.color == Game.turn:
+            if square.is_clicked() and square.coords in possible_moves:
                 attacking_square.piece = None               
                 square.piece = attacking_piece
                 square.piece.location = square.coords
                 self.unselect_pieces()
                 self.change_turns()
+                # Move rook if King is castled
+                def is_rook_present(x_rook_pos, y_rook_pos):
+                    for square_rook in Game.squares:
+                        if square_rook.piece:
+                            if square_rook.piece.name == 'rook':
+                                if square_rook.piece.color == Game.turn:
+                                    x_rook, y_rook = square_rook.coords
+                                    if y_rook == y_rook_pos:
+                                        if x_rook == x_rook_pos:
+                                            return True
+                if attacking_piece.name == 'king':
+                    x_king_before, y_king_before = piece_coords
+                    x_king_after, y_king_after = square.coords
+                    def move_rook(king_factor, rook_factor):
+                        if y_king_before == y_king_after:
+                            if x_king_before == x_king_after + king_factor:
+                                x_rook, y_rook = square_rook.coords
+                                x_rook_destination = x_rook + rook_factor
+                                y_rook_destination = y_king_before
+                                attacking_rook = square_rook
+                                square_rook.piece = None
+                                square.piece = attacking_rook      
+                    # Lower left
+                    if is_rook_present(0, 7):
+                        move_rook(-2, 3)
+                    # Lower right
+                    if is_rook_present(7, 7):
+                        move_rook(2, -2)
+                    # Upper left
+                    if is_rook_present(0, 0):
+                        move_rook(-2, 3)
+                    # Upper right
+                    if is_rook_present(7, 0):
+                        move_rook(2, -2)
+                        
     def change_turns(self):
         if Game.turn == "white":
             Game.turn = "black"
@@ -420,6 +462,7 @@ class King(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         factors_set = set()
+        # Comments indicate direction e.g. U = Up, DL = Down left, etc.
         factors_set.add((1, -1))  #UR
         factors_set.add((0, -1))  #U
         factors_set.add((-1, -1)) #UL
@@ -432,7 +475,6 @@ class King(Piece):
             x_factor, y_factor = factors
             for square in Game.squares:
                 x_possible_square, y_possible_square = square.coords
-                # if square.piece:
                 if square.piece and square.piece.color == Game.turn:
                     pass
                 elif x_piece == x_possible_square - x_factor:
@@ -440,7 +482,51 @@ class King(Piece):
                         self.possible_moves.add((square.coords))
         for factors in factors_set:
             update_possible_move(factors)
-
+        # Adds possible castle moves
+        def add_possible_castle(turn, x_rook_pos, y_rook_pos, factor):
+            for square in Game.squares:
+                if not square.piece:
+                    x_square, y_square = square.coords
+                    x_piece, y_piece = self.location
+                    if Game.turn == turn:
+                        if x_square == x_piece + factor:
+                            if y_square == y_piece:
+                                for square_rook in Game.squares:
+                                    if square_rook.piece:
+                                        if square_rook.piece.name == 'rook':
+                                            if square_rook.piece.color == Game.turn:
+                                                x_rook, y_rook = square_rook.coords
+                                                if y_rook == y_rook_pos:
+                                                    if x_rook == x_rook_pos:
+                                                        self.possible_moves.add(square.coords)
+        if self.origin == self.location:
+            def any_piece(turn, side):
+                if side == 'left':
+                    x_squares = [1,2,3]
+                else:
+                    x_squares = [5,6]
+                if turn == 'white':
+                    y_square_pos = 7
+                else:
+                    y_square_pos = 0            
+                for square in Game.squares:
+                    x_square, y_square = square.coords
+                    if y_square == y_square_pos:
+                        if x_square in x_squares:
+                            if square.piece:
+                                return True
+            if not any_piece('white', 'left'):
+                # White left side castle
+                add_possible_castle('white', 0, 7, -2)
+            if not any_piece('white', 'right'):
+                # White right side castle
+                add_possible_castle('white', 7, 7,  2)
+            if not any_piece('black', 'left'):
+                # Black left side castle
+                add_possible_castle('black', 0, 0, -2)
+            if not any_piece('black', 'right'):
+                # Black right side castle
+                add_possible_castle('black', 7, 0,  2)
 
 def main():
     game = Game()
