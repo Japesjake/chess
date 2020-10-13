@@ -182,39 +182,36 @@ class Game:
                 self.unselect_pieces()
                 self.change_turns()
                 # Move rook if King is castled
-                def is_rook_present(x_rook_pos, y_rook_pos):
-                    for square_rook in Game.squares:
-                        if square_rook.piece:
-                            if square_rook.piece.name == 'rook':
-                                if square_rook.piece.color == Game.turn:
-                                    x_rook, y_rook = square_rook.coords
-                                    if y_rook == y_rook_pos:
-                                        if x_rook == x_rook_pos:
-                                            return True
                 if attacking_piece.name == 'king':
                     x_king_before, y_king_before = piece_coords
                     x_king_after, y_king_after = square.coords
-                    def move_rook(king_factor, rook_factor):
+                    def move_rook(x_rook_pos, y_rook_pos, king_factor, rook_factor):
+                        for square_rook_before in Game.squares:
+                            if square_rook_before.piece:
+                                if square_rook_before.piece.name == 'rook':
+                                    if square_rook_before.piece.color == Game.turn:
+                                        x_rook, y_rook = square_rook_before.coords
+                                        if y_rook == y_rook_pos:
+                                            if x_rook == x_rook_pos:
+                                                break
                         if y_king_before == y_king_after:
-                            if x_king_before == x_king_after + king_factor:
-                                x_rook, y_rook = square_rook.coords
+                            if x_king_before == x_king_after - king_factor:
                                 x_rook_destination = x_rook + rook_factor
                                 y_rook_destination = y_king_before
-                                attacking_rook = square_rook
-                                square_rook.piece = None
-                                square.piece = attacking_rook      
+                                moving_rook = square_rook_before.piece
+                                for square in Game.squares:
+                                    if square.piece:
+                                        if square.coords == (x_rook_destination, y_rook_destination):
+                                            square_rook_before.piece = None
+                                            square.piece = moving_rook      
                     # Lower left
-                    if is_rook_present(0, 7):
-                        move_rook(-2, 3)
+                    move_rook(0, 7, -2, 3)
                     # Lower right
-                    if is_rook_present(7, 7):
-                        move_rook(2, -2)
+                    move_rook(7, 7, 2, -2)
                     # Upper left
-                    if is_rook_present(0, 0):
-                        move_rook(-2, 3)
+                    move_rook(0, 0, -2, 3)
                     # Upper right
-                    if is_rook_present(7, 0):
-                        move_rook(2, -2)
+                    move_rook(7, 0, 2, -2)
                         
     def change_turns(self):
         if Game.turn == "white":
