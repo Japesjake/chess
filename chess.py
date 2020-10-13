@@ -18,6 +18,7 @@ class Graphics:
     DARK_GREEN = (0,100,0)
     TAN = (210,180,140)
     YELLOW = (255,255,0)
+    RED = (255,0,0)
     def __init__(self):
         self.init = pg.init()
         self.set_caption = pg.display.set_caption("Chess")
@@ -30,9 +31,11 @@ class Graphics:
     def draw(self):
         self.draw_board()
         self.draw_pieces()
+        self.draw_check()
         if Game.is_piece_selected():
             self.draw_possible_moves()
             self.draw_selection()
+            
         self.update()
     def draw_pieces(self):
         for square in Game.squares:
@@ -61,9 +64,16 @@ class Graphics:
                     x_pixel, y_pixel = self.pixelate(coords)
                     pg.draw.rect(self.screen,self.YELLOW,(x_pixel + 1, y_pixel + 1, Board.SQUARE_SIZE - 2,Board.SQUARE_SIZE - 2),5)
                     # pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
-
+    def draw_check(self):
+        for square in Game.squares:
+            if square.piece:
+                if square.piece.name == 'king':
+                    if square.piece.checked:
+                        x_pixel, y_pixel = self.pixelate(square.coords)
+                        pg.draw.circle(self.screen,self.RED, (x_pixel + int(Board.SQUARE_SIZE / 2), y_pixel + int(Board.SQUARE_SIZE / 2)), 5)
 class Game:
     squares = set()
+    all_possible_moves = set()
     turn = 'white'    
     def __init__(self):
         self.running = True
@@ -78,9 +88,11 @@ class Game:
                 if event.type == pg.QUIT:
                     self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1:
+                    if event.button == 1:                       
                         self.select_piece()
                         self.move_piece()
+                        self.check_king()
+
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -118,14 +130,14 @@ class Game:
                 square.piece = Knight('knight', 'black', square.coords)
     def set_bishops(self):
         for square in Game.squares:
-            if square.coords == (2, 7):
-                square.piece = Bishop('bishop', 'white', square.coords)
+            # if square.coords == (2, 7):
+            #     square.piece = Bishop('bishop', 'white', square.coords)
             if square.coords == (5, 7):
                 square.piece = Bishop('bishop', 'white', square.coords)
-            if square.coords == (5, 0):
-                square.piece = Bishop('bishop', 'black', square.coords)
-            if square.coords == (2, 0):
-                square.piece = Bishop('bishop', 'black', square.coords)
+            # if square.coords == (5, 0):
+            #     square.piece = Bishop('bishop', 'black', square.coords)
+            # if square.coords == (2, 0):
+            #     square.piece = Bishop('bishop', 'black', square.coords)
     def set_queens(self):
         for square in Game.squares:
             if square.coords == (3, 7):
@@ -138,8 +150,10 @@ class Game:
                 square.piece = King('king', 'white', square.coords)
             if square.coords == (4, 0):
                 square.piece = King('king', 'black', square.coords)
+            if square.coords == (2, 4):
+                square.piece = King('king', 'black', square.coords)
     def set_pieces(self):
-        self.set_pawns()
+        # self.set_pawns()
         self.set_rooks()
         self.set_knights()
         self.set_bishops()
@@ -203,7 +217,8 @@ class Game:
                                         if square.coords == (x_rook_destination, y_rook_destination):
                                             moving_rook = square_rook.piece
                                             square_rook.piece = None
-                                            square.piece = moving_rook      
+                                            square.piece = moving_rook
+                                            square.piece.location = square.coords      
                     # Lower left
                     move_rook(0, 7, -2, 3)
                     # Lower right
@@ -211,13 +226,29 @@ class Game:
                     # Upper left
                     move_rook(0, 0, -2, 3)
                     # Upper right
-                    move_rook(7, 0, 2, -2)
-                        
+                    move_rook(7, 0, 2, -2)                    
     def change_turns(self):
         if Game.turn == "white":
             Game.turn = "black"
         else:
             Game.turn = "white"
+    def update_all_possible_moves(self):
+        self.all_possible_moves = set()
+        for square in self.squares:
+            if square.piece:
+                if square.piece.color != self.turn:
+                    square.piece.update_possible_moves()
+                    self.all_possible_moves.update(square.piece.possible_moves)
+    def check_king(self):
+        self.update_all_possible_moves()
+        for square in self.squares:
+            if square.piece:
+                if square.piece.name == 'king':
+                    if square.piece.color == self.turn:
+                        if square.coords in self.all_possible_moves: 
+                            square.piece.checked = True
+                        else:
+                            square.piece.checked = False
 
 class Board:
     WIDTH = 8
@@ -278,6 +309,7 @@ class Pawn(Piece):
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
                         self.possible_captures.add(square.coords)
+            print(True)
     def is_forward_empty(self):
         for square in Game.squares:
             x_selected, y_selected = square.coords
@@ -372,7 +404,6 @@ class Knight(Piece):
                         self.possible_moves.add((square.coords))
         for factors in factors_set:
             update_possible_move(factors)
-        print(self.possible_moves)
 
 class Bishop(Piece):
     def __init__(self, name, color, location):
@@ -455,6 +486,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, name, color, location):
         Piece.__init__(self, name, color, location)
+        self.checked = False
     def update_possible_moves(self):
         self.possible_moves = set()
         x_piece, y_piece = self.location
@@ -497,6 +529,7 @@ class King(Piece):
                                                     if x_rook == x_rook_pos:
                                                         self.possible_moves.add(square.coords)
         if self.origin == self.location:
+            # checks if there is a piece between king and rook
             def any_piece(turn, side):
                 if side == 'left':
                     x_squares = [1,2,3]
@@ -513,16 +546,16 @@ class King(Piece):
                             if square.piece:
                                 return True
             if not any_piece('white', 'left'):
-                # White left side castle
+                # Lower left side castle
                 add_possible_castle('white', 0, 7, -2)
             if not any_piece('white', 'right'):
-                # White right side castle
+                # Lower right side castle
                 add_possible_castle('white', 7, 7,  2)
             if not any_piece('black', 'left'):
-                # Black left side castle
+                # Upper left side castle
                 add_possible_castle('black', 0, 0, -2)
             if not any_piece('black', 'right'):
-                # Black right side castle
+                # Upper right side castle
                 add_possible_castle('black', 7, 0,  2)
 
 def main():
