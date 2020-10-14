@@ -91,9 +91,11 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:                       
                         self.select_piece()
-                        self.move_piece()
+                        moved = self.move_piece()
                         self.check_king()
-
+                        if moved:
+                            self.change_turns()
+                        
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
@@ -131,10 +133,11 @@ class Game:
                 square.piece = Knight('knight', 'black', square.coords)
     def set_bishops(self):
         for square in Game.squares:
+            pass
             # if square.coords == (2, 7):
             #     square.piece = Bishop('bishop', 'white', square.coords)
-            if square.coords == (5, 7):
-                square.piece = Bishop('bishop', 'white', square.coords)
+            # if square.coords == (5, 7):
+            #     square.piece = Bishop('bishop', 'white', square.coords)
             # if square.coords == (5, 0):
             #     square.piece = Bishop('bishop', 'black', square.coords)
             # if square.coords == (2, 0):
@@ -167,6 +170,7 @@ class Game:
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
+                return True
     def unselect_pieces(self):
         for square in self.squares:
             if square.piece and square.piece.selected == True:
@@ -195,7 +199,8 @@ class Game:
                 square.piece = attacking_piece
                 square.piece.location = square.coords
                 self.unselect_pieces()
-                self.change_turns()
+                return True
+                # self.change_turns()
                 # Move rook if King is castled
                 if attacking_piece.name == 'king':
                     x_king_before, y_king_before = piece_coords
@@ -239,31 +244,36 @@ class Game:
         else:
             return 'white'
     def update_all_friendly_possible_moves(self):
-        self.change_turns()
         self.all_friendly_possible_moves = set()
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
                     square.piece.update_possible_moves()
                     self.all_friendly_possible_moves.update(square.piece.possible_moves)
+    def update_all_enemy_possible_moves(self):
         self.change_turns()
-    # def update_all_enemy_possible_moves(self):
-    #     self.all_enemy_possible_moves = set()
-    #     for square in self.squares:
-    #         if square.piece:
-    #             if square.piece.color == self.turn:
-    #                 square.piece.update_possible_moves()
-    #                 self.all_enemy_possible_moves.update(square.piece.possible_moves)
+        self.all_enemy_possible_moves = set()
+        for square in self.squares:
+            if square.piece:
+                if square.piece.color == self.turn:
+                    square.piece.update_possible_moves()
+                    self.all_enemy_possible_moves.update(square.piece.possible_moves)
+        self.change_turns()
     def check_king(self):
         self.update_all_friendly_possible_moves()
+        self.update_all_enemy_possible_moves()
         for square in self.squares:
             if square.piece:
                 if square.piece.name == 'king':
-                    # if square.piece.color != self.turn:
+                    if square.piece.color != self.turn:
                         if square.coords in self.all_friendly_possible_moves: 
                             square.piece.checked = True
                         else:
-                        # elif not square.coords in self.all_friendly_possible_moves:
+                            square.piece.checked = False
+                    else:
+                        if square.coords in self.all_enemy_possible_moves: 
+                            square.piece.checked = True
+                        else:
                             square.piece.checked = False
 class Board:
     WIDTH = 8
@@ -324,7 +334,6 @@ class Pawn(Piece):
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
                         self.possible_captures.add(square.coords)
-            print(True)
     def is_forward_empty(self):
         for square in Game.squares:
             x_selected, y_selected = square.coords
@@ -427,7 +436,6 @@ class Bishop(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         def update_possible_move(x_coord, y_coord):
-            print(True)
             for square in Game.squares:
                 if square.coords == (x_coord, y_coord):
                     if square.piece and square.piece.color == Game.turn:
