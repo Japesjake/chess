@@ -76,7 +76,7 @@ class Game:
     squares = set()
     all_friendly_possible_moves = set()
     all_enemy_possible_moves = set()
-    turn = 'white'    
+    turn = 'black'    
     def __init__(self):
         self.running = True
     def run(self):
@@ -163,7 +163,7 @@ class Game:
         self.set_rooks()
         # self.set_knights()
         # self.set_bishops()
-        self.set_queens()
+        # self.set_queens()
         self.set_kings()
     def select_piece(self):
         for square in self.squares:
@@ -216,6 +216,8 @@ class Game:
                                         if y_rook == y_rook_pos:
                                             if x_rook == x_rook_pos:
                                                 break
+                                            else:
+                                                square_rook = None
                         if y_king_before == y_king_after:
                             if x_king_before == x_king_after - king_factor:
                                 x_rook_destination = x_rook_pos + rook_factor
@@ -226,15 +228,12 @@ class Game:
                                             moving_rook = square_rook.piece
                                             square_rook.piece = None
                                             square.piece = moving_rook
-                                            square.piece.location = square.coords      
-                    # Lower left
-                    move_rook(0, 7, -2, 3)
-                    # Lower right
-                    move_rook(7, 7, 2, -2)
-                    # Upper left
-                    move_rook(0, 0, -2, 3)
-                    # Upper right
-                    move_rook(7, 0, 2, -2)
+                                            # square.piece.location = square.coords      
+                    
+                    move_rook(0, 7, -2, 3) # Lower left
+                    move_rook(7, 7, 2, -2) # Lower right
+                    move_rook(0, 0, -2, 3) # Upper left
+                    move_rook(7, 0, 2, -2) # Upper right
                 return moved
     def change_turns(self):
         if Game.turn == "white":
