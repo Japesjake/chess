@@ -76,7 +76,7 @@ class Game:
     squares = set()
     all_friendly_possible_moves = set()
     all_enemy_possible_moves = set()
-    turn = 'black'    
+    turn = 'white'    
     def __init__(self):
         self.running = True
     def run(self):
@@ -112,9 +112,12 @@ class Game:
             for square in self.squares:
                 if square.coords == (x_coord, y_coord):
                     square.piece = Pawn('pawn', 'black', square.coords)
+        # for square in self.squares:
+        #     if square.coords not in [(5,0),(6,0)]:
+        #         square.piece = Pawn('pawn', 'black', square.coords)
     def set_rooks(self):
         for square in self.squares:
-            if square.coords == (0,0):
+            if square.coords == (1,0):
                 square.piece = Rook('rook', 'black', square.coords)
             if square.coords == (7,0):
                 square.piece = Rook('rook', 'black', square.coords)
@@ -134,15 +137,14 @@ class Game:
                 square.piece = Knight('knight', 'black', square.coords)
     def set_bishops(self):
         for square in Game.squares:
-            pass
-            # if square.coords == (2, 7):
-            #     square.piece = Bishop('bishop', 'white', square.coords)
-            # if square.coords == (5, 7):
-            #     square.piece = Bishop('bishop', 'white', square.coords)
-            # if square.coords == (5, 0):
-            #     square.piece = Bishop('bishop', 'black', square.coords)
-            # if square.coords == (2, 0):
-            #     square.piece = Bishop('bishop', 'black', square.coords)
+            if square.coords == (2, 7):
+                square.piece = Bishop('bishop', 'white', square.coords)
+            if square.coords == (5, 7):
+                square.piece = Bishop('bishop', 'white', square.coords)
+            if square.coords == (5, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
+            if square.coords == (2, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
     def set_queens(self):
         for square in Game.squares:
             if square.coords == (3, 7):
@@ -159,10 +161,10 @@ class Game:
                 square.piece = King('king', 'black', square.coords)
     ### Set Pieces ###
     def set_pieces(self):
-        # self.set_pawns()
+        self.set_pawns()
         self.set_rooks()
         # self.set_knights()
-        # self.set_bishops()
+        self.set_bishops()
         # self.set_queens()
         self.set_kings()
     def select_piece(self):
@@ -210,25 +212,28 @@ class Game:
                     def move_rook(x_rook_pos, y_rook_pos, king_factor, rook_factor):
                         for square_rook in Game.squares:
                             if square_rook.piece:
-                                if square_rook.piece.name == 'rook':
-                                    if square_rook.piece.color == attacking_piece.color:
-                                        x_rook, y_rook = square_rook.coords
-                                        if y_rook == y_rook_pos:
-                                            if x_rook == x_rook_pos:
-                                                break
-                                            else:
-                                                square_rook = None
-                        if y_king_before == y_king_after:
-                            if x_king_before == x_king_after - king_factor:
-                                x_rook_destination = x_rook_pos + rook_factor
-                                y_rook_destination = y_king_before
-                                for square in Game.squares:
-                                    if square.piece == None:
-                                        if square.coords == (x_rook_destination, y_rook_destination):
-                                            moving_rook = square_rook.piece
-                                            square_rook.piece = None
-                                            square.piece = moving_rook
-                                            # square.piece.location = square.coords      
+                                x_rook, y_rook = square_rook.coords
+                                if square_rook.piece.name == 'rook' \
+                                and square_rook.piece.color == attacking_piece.color \
+                                and y_rook == y_rook_pos \
+                                and x_rook == x_rook_pos:
+                                    rook_exists = True
+                                    square_rook_before = square_rook
+                                    break
+                                else:
+                                    rook_exists = False
+                        if rook_exists:
+                            if y_king_before == y_king_after:
+                                if x_king_before == x_king_after - king_factor:
+                                    x_rook_destination = x_rook_pos + rook_factor
+                                    y_rook_destination = y_king_before
+                                    for square in Game.squares:
+                                        if square.piece == None:
+                                            if square.coords == (x_rook_destination, y_rook_destination):
+                                                moving_rook = square_rook_before.piece
+                                                square_rook.piece = None
+                                                square.piece = moving_rook
+                                                square.piece.location = square.coords      
                     
                     move_rook(0, 7, -2, 3) # Lower left
                     move_rook(7, 7, 2, -2) # Lower right
