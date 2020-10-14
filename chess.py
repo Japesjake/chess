@@ -73,8 +73,9 @@ class Graphics:
                         pg.draw.circle(self.screen,self.RED, (x_pixel + int(Board.SQUARE_SIZE / 2), y_pixel + int(Board.SQUARE_SIZE / 2)), 5)
 class Game:
     squares = set()
-    all_possible_moves = set()
-    turn = 'white'    
+    all_friendly_possible_moves = set()
+    all_enemy_possible_moves = set()
+    turn = 'black'    
     def __init__(self):
         self.running = True
     def run(self):
@@ -146,10 +147,10 @@ class Game:
                 square.piece = Queen('queen', 'black', square.coords)
     def set_kings(self):
         for square in Game.squares:
-            if square.coords == (4, 7):
-                square.piece = King('king', 'white', square.coords)
-            if square.coords == (4, 0):
-                square.piece = King('king', 'black', square.coords)
+            # if square.coords == (4, 7):
+            #     square.piece = King('king', 'white', square.coords)
+            # if square.coords == (4, 0):
+            #     square.piece = King('king', 'black', square.coords)
             if square.coords == (2, 4):
                 square.piece = King('king', 'black', square.coords)
     def set_pieces(self):
@@ -232,24 +233,38 @@ class Game:
             Game.turn = "black"
         else:
             Game.turn = "white"
-    def update_all_possible_moves(self):
-        self.all_possible_moves = set()
+    def return_opposite_turn(self):
+        if self.turn == 'white':
+            return 'black'
+        else:
+            return 'white'
+    def update_all_friendly_possible_moves(self):
+        self.change_turns()
+        self.all_friendly_possible_moves = set()
         for square in self.squares:
             if square.piece:
-                if square.piece.color != self.turn:
+                if square.piece.color == self.turn:
                     square.piece.update_possible_moves()
-                    self.all_possible_moves.update(square.piece.possible_moves)
+                    self.all_friendly_possible_moves.update(square.piece.possible_moves)
+        self.change_turns()
+    # def update_all_enemy_possible_moves(self):
+    #     self.all_enemy_possible_moves = set()
+    #     for square in self.squares:
+    #         if square.piece:
+    #             if square.piece.color == self.turn:
+    #                 square.piece.update_possible_moves()
+    #                 self.all_enemy_possible_moves.update(square.piece.possible_moves)
     def check_king(self):
-        self.update_all_possible_moves()
+        self.update_all_friendly_possible_moves()
         for square in self.squares:
             if square.piece:
                 if square.piece.name == 'king':
-                    if square.piece.color == self.turn:
-                        if square.coords in self.all_possible_moves: 
+                    # if square.piece.color != self.turn:
+                        if square.coords in self.all_friendly_possible_moves: 
                             square.piece.checked = True
                         else:
+                        # elif not square.coords in self.all_friendly_possible_moves:
                             square.piece.checked = False
-
 class Board:
     WIDTH = 8
     HEIGHT = WIDTH
@@ -412,6 +427,7 @@ class Bishop(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         def update_possible_move(x_coord, y_coord):
+            print(True)
             for square in Game.squares:
                 if square.coords == (x_coord, y_coord):
                     if square.piece and square.piece.color == Game.turn:
@@ -557,7 +573,9 @@ class King(Piece):
             if not any_piece('black', 'right'):
                 # Upper right side castle
                 add_possible_castle('black', 7, 0,  2)
-
+    def make_checked(self):
+        if not self.checked:
+            self.checked = True
 def main():
     game = Game()
     game.run()
