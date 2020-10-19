@@ -5,6 +5,7 @@ import os
 
 # To do: fix bug where pawns jump pieces at origin
 # To do: keep king from moving into enemy possible moves
+# To do: restrict king movement when checked
 
 class Graphics:
     HEIGHT = 800
