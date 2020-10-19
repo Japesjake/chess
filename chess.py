@@ -155,8 +155,8 @@ class Game:
                 square.piece = Queen('queen', 'black', square.coords)
     def set_kings(self):
         for square in self.squares:
-            if square.coords == (4, 7):
-                square.piece = King('king', 'white', square.coords)
+            # if square.coords == (4, 7):
+            #     square.piece = King('king', 'white', square.coords)
             # if square.coords == (4, 0):
             #     square.piece = King('king', 'black', square.coords)
             if square.coords == (2, 4):
@@ -268,6 +268,7 @@ class Game:
                 if square.piece.color == self.turn:
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
+
         self.change_turns()
     def check_king(self):
         self.update_all_friendly_possible_moves()
@@ -285,7 +286,7 @@ class Game:
                             square.piece.checked = True
                         else:
                             square.piece.checked = False
-                            
+
     def is_friendly_king_checked(self):
         self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
@@ -300,25 +301,28 @@ class Game:
 
     def update_safe_moves(self):
         self.safe_moves = set()
-        for square in game.squares:
+        for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
                     moving_piece = square.piece
                     moving_square = square
                     possible_moves = square.piece.possible_moves.copy()
                     for move in possible_moves:
-                        for square in game.squares:
-                            if square.coords == move:
+                        for square_destination in self.squares:
+                            if square_destination.coords == move:
                                 moving_square.piece == None
-                                captured_piece = square.piece
-                                square.piece = moving_piece
-                                square.piece.location = square.coords
+                                captured_piece = square_destination.piece
+                                square_destination.piece = moving_piece # Move
+                                square_destination.piece.location = square_destination.coords
+                                if moving_piece.name == 'pawn':
+                                    self.pawn = moving_piece  ###
+                                    self.square_destination = square_destination  ###
                                 if not self.is_friendly_king_checked():
-                                    game.safe_moves.add(move)
+                                    self.safe_moves.add(move)
                                 moving_square.piece = moving_piece
-                                square.piece = captured_piece
+                                square_destination.piece = captured_piece
                                 moving_square.piece.location = moving_square.coords
-
+                                
 
 class Board:
     WIDTH = 8
