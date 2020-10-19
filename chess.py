@@ -1,5 +1,6 @@
 import pygame as pg
 import os
+from copy import deepcopy
 
 # All icons made by Freepik from www.flaticon.com
 
@@ -276,13 +277,17 @@ class Game:
                     if square.piece.color != self.turn:
                         if square.coords in self.all_friendly_possible_moves: 
                             square.piece.checked = True
+                            return True
                         else:
                             square.piece.checked = False
+                            return False
                     else:
                         if square.coords in self.all_enemy_possible_moves: 
                             square.piece.checked = True
+                            return True
                         else:
                             square.piece.checked = False
+                            return False
 
 class Board:
     WIDTH = 8
@@ -317,7 +322,21 @@ class Piece:
         self.checked = False
         self.update_possible_moves()
     def update_possible_moves_checked(self):
-        pass
+        for square in game.squares:
+            if square.piece:
+                if square.piece.name == 'king':
+                    if square.piece.color == game.turn:
+                        if square.piece.check:
+                            squares = game.squares
+                            future_game = deepcopy(game)
+                            for square in future_game.squares:
+                                pass
+
+
+
+
+
+
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
