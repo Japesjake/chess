@@ -5,8 +5,7 @@ from copy import deepcopy
 # All icons made by Freepik from www.flaticon.com
 
 # To do: fix bug where pawns jump pieces at origin
-# To do: keep king from moving into enemy possible moves
-# To do: restrict king movement when checked
+# To do: restrict movement into check.
 
 class Graphics:
     HEIGHT = 800
@@ -79,7 +78,8 @@ class Game:
         self.squares = set()
         self.all_friendly_possible_moves = set()
         self.all_enemy_possible_moves = set()
-        self.turn = 'white'
+        self.safe_moves = set()
+        self.turn = 'black'
         self.running = True
     def run(self):
         graphics = Graphics()
@@ -104,19 +104,19 @@ class Game:
             for x_coord in range(Board.WIDTH):
                 self.squares.add(Square((x_coord, y_coord)))     
     def set_pawns(self):
-        y_coord = Board.HEIGHT - 2
-        for x_coord in range(Board.WIDTH):
-            for square in self.squares:
-                if square.coords == (x_coord, y_coord):
-                    square.piece = Pawn('pawn', 'white', square.coords)
-        y_coord = 1
-        for x_coord in range(Board.WIDTH):
-            for square in self.squares:
-                if square.coords == (x_coord, y_coord):
-                    square.piece = Pawn('pawn', 'black', square.coords)
-        # for square in self.squares:
-        #     if square.coords not in [(5,0),(6,0)]:
-        #         square.piece = Pawn('pawn', 'black', square.coords)
+        # y_coord = Board.HEIGHT - 2
+        # for x_coord in range(Board.WIDTH):
+        #     for square in self.squares:
+        #         if square.coords == (x_coord, y_coord):
+        #             square.piece = Pawn('pawn', 'white', square.coords)
+        # y_coord = 1
+        # for x_coord in range(Board.WIDTH):
+        #     for square in self.squares:
+        #         if square.coords == (x_coord, y_coord):
+        #             square.piece = Pawn('pawn', 'black', square.coords)
+        for square in self.squares:
+            if square.coords == (3,5):
+                square.piece = Pawn('pawn', 'black', square.coords)
     def set_rooks(self):
         for square in self.squares:
             if square.coords == (1,0):
@@ -157,16 +157,16 @@ class Game:
         for square in self.squares:
             if square.coords == (4, 7):
                 square.piece = King('king', 'white', square.coords)
-            if square.coords == (4, 0):
-                square.piece = King('king', 'black', square.coords)
+            # if square.coords == (4, 0):
+            #     square.piece = King('king', 'black', square.coords)
             if square.coords == (2, 4):
                 square.piece = King('king', 'black', square.coords)
     ### Set Pieces ###
     def set_pieces(self):
         self.set_pawns()
-        self.set_rooks()
+        # self.set_rooks()
         # self.set_knights()
-        self.set_bishops()
+        # self.set_bishops()
         # self.set_queens()
         self.set_kings()
     def select_piece(self):
@@ -176,6 +176,7 @@ class Game:
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
                 square.piece.update_possible_moves()
+                square.piece.update_possible_moves_considering_safe()
                 return True
     def unselect_pieces(self):
         for square in self.squares:
@@ -288,7 +289,26 @@ class Game:
                         else:
                             square.piece.checked = False
                             return False
-
+    # def update_safe_moves(self):
+    #     self.safe_moves = set()
+    #     old_squares = game.squares.copy()
+    #     future_squares = game.squares
+    #     for square in future_squares:
+    #         if square.piece:
+    #             if square.piece.color == self.turn:
+    #                 future_squares = old_squares.copy()
+    #                 moving_piece = square.piece
+    #                 moving_square = square
+    #                 possible_moves = square.piece.possible_moves.copy()
+    #                 for move in possible_moves:
+    #                     moving_square.piece == None
+    #                     for square in future_squares:
+    #                         if square.coords == move:
+    #                             square.piece = moving_piece
+    #                             square.piece.location = square.coords
+    #                             if not game.check_king():
+    #                                 game.safe_moves.add(move)
+    #     return old_squares
 class Board:
     WIDTH = 8
     HEIGHT = WIDTH
@@ -321,22 +341,14 @@ class Piece:
         self.selected = False
         self.checked = False
         self.update_possible_moves()
-    def update_possible_moves_checked(self):
-        for square in game.squares:
-            if square.piece:
-                if square.piece.name == 'king':
-                    if square.piece.color == game.turn:
-                        if square.piece.check:
-                            squares = game.squares
-                            future_game = deepcopy(game)
-                            for square in future_game.squares:
-                                pass
 
-
-
-
-
-
+    # def update_possible_moves_considering_safe(self):
+    #     old_squares = game.update_safe_moves()
+    #     possible_moves_static = self.possible_moves.copy()
+    #     for move in possible_moves_static:
+    #         if move not in game.safe_moves:
+    #             self.possible_moves.remove(move)
+    #     game.squares = old_squares.copy()
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
