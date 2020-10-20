@@ -1,12 +1,7 @@
 import pygame as pg
 import os
-from copy import deepcopy
 
 # All icons made by Freepik from www.flaticon.com
-
-# To do: fix bug where pawns jump pieces at origin
-# To do: restrict movement into check.
-# To do: Test Rooks
 
 class Graphics:
     HEIGHT = 800
@@ -57,15 +52,13 @@ class Graphics:
         for square in game.squares:
             if square.piece and square.piece.selected:
                 x_pixel, y_pixel = self.pixelate(square.coords)
-                # pg.draw.rect(self.screen,self.GREEN,(x_pixel + 5, y_pixel + 5, Board.SQUARE_SIZE - 10,Board.SQUARE_SIZE - 10),5)
                 pg.draw.circle(self.screen,self.GREEN, (x_pixel + int(Board.SQUARE_SIZE / 2), y_pixel + int(Board.SQUARE_SIZE / 2)), 5)
     def draw_possible_moves(self):
         for square in game.squares:
             if square.piece and square.piece.selected:
-                for coords in square.piece.possible_moves:
+                for coords in square.piece.possible_safe_moves:
                     x_pixel, y_pixel = self.pixelate(coords)
                     pg.draw.rect(self.screen,self.YELLOW,(x_pixel + 1, y_pixel + 1, Board.SQUARE_SIZE - 2,Board.SQUARE_SIZE - 2),5)
-                    # pg.draw.rect(self.screen,self.YELLOW,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE),5)
     def draw_check(self):
         for square in game.squares:
             if square.piece:
@@ -95,32 +88,30 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:                       
                         self.select_piece()
-                        moved = self.move_piece()
+                        self.move_piece()
                         self.check_king()
-                        # if moved:
-                        #     self.change_turns()
                         
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
             for x_coord in range(Board.WIDTH):
                 self.squares.add(Square((x_coord, y_coord)))     
     def set_pawns(self):
-        # y_coord = Board.HEIGHT - 2
-        # for x_coord in range(Board.WIDTH):
-        #     for square in self.squares:
-        #         if square.coords == (x_coord, y_coord):
-        #             square.piece = Pawn('pawn', 'white', square.coords)
-        # y_coord = 1
-        # for x_coord in range(Board.WIDTH):
-        #     for square in self.squares:
-        #         if square.coords == (x_coord, y_coord):
-        #             square.piece = Pawn('pawn', 'black', square.coords)
-        for square in self.squares:
-            if square.coords == (3,5):
-                square.piece = Pawn('pawn', 'black', square.coords)
+        y_coord = Board.HEIGHT - 2
+        for x_coord in range(Board.WIDTH):
+            for square in self.squares:
+                if square.coords == (x_coord, y_coord):
+                    square.piece = Pawn('pawn', 'white', square.coords)
+        y_coord = 1
+        for x_coord in range(Board.WIDTH):
+            for square in self.squares:
+                if square.coords == (x_coord, y_coord):
+                    square.piece = Pawn('pawn', 'black', square.coords)
+        # for square in self.squares:
+        #     if square.coords == (3,5):
+        #         square.piece = Pawn('pawn', 'black', square.coords)
     def set_rooks(self):
         for square in self.squares:
-            if square.coords == (1,0):
+            if square.coords == (0,0):
                 square.piece = Rook('rook', 'black', square.coords)
             if square.coords == (7,0):
                 square.piece = Rook('rook', 'black', square.coords)
@@ -138,18 +129,18 @@ class Game:
                 square.piece = Knight('knight', 'black', square.coords)
             if square.coords == (6,0):
                 square.piece = Knight('knight', 'black', square.coords)
-            if square.coords == (5,4):
-                square.piece = Knight('knight', 'black', square.coords)                
+            # if square.coords == (5,4):
+            #     square.piece = Knight('knight', 'black', square.coords)                
     def set_bishops(self):
         for square in self.squares:
-            # if square.coords == (2, 7):
-            #     square.piece = Bishop('bishop', 'white', square.coords)
+            if square.coords == (2, 7):
+                square.piece = Bishop('bishop', 'white', square.coords)
             if square.coords == (5, 7):
                 square.piece = Bishop('bishop', 'white', square.coords)
-            # if square.coords == (5, 0):
-            #     square.piece = Bishop('bishop', 'black', square.coords)
-            # if square.coords == (2, 0):
-            #     square.piece = Bishop('bishop', 'black', square.coords)
+            if square.coords == (5, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
+            if square.coords == (2, 0):
+                square.piece = Bishop('bishop', 'black', square.coords)
     def set_queens(self):
         for square in self.squares:
             if square.coords == (3, 7):
@@ -158,19 +149,19 @@ class Game:
                 square.piece = Queen('queen', 'black', square.coords)
     def set_kings(self):
         for square in self.squares:
-            # if square.coords == (4, 7):
-            #     square.piece = King('king', 'white', square.coords)
-            # if square.coords == (4, 0):
-            #     square.piece = King('king', 'black', square.coords)
-            if square.coords == (2, 4):
+            if square.coords == (4, 7):
+                square.piece = King('king', 'white', square.coords)
+            if square.coords == (4, 0):
                 square.piece = King('king', 'black', square.coords)
+            # if square.coords == (2, 4):
+            #     square.piece = King('king', 'black', square.coords)
     ### Set Pieces ###
     def set_pieces(self):
-        # self.set_pawns()
-        # self.set_rooks()
+        self.set_pawns()
+        self.set_rooks()
         self.set_knights()
-        # self.set_bishops()
-        # self.set_queens()
+        self.set_bishops()
+        self.set_queens()
         self.set_kings()
     def select_piece(self):
         for square in self.squares:
@@ -178,7 +169,6 @@ class Game:
                 selected_before_reset = square.piece.selected
                 self.unselect_pieces()
                 square.piece.selected = not selected_before_reset
-                # square.piece.update_possible_moves()
                 square.piece.update_possible_safe_moves()
                 return True
     def unselect_pieces(self):
@@ -208,6 +198,7 @@ class Game:
                 square.piece.location = square.coords
                 self.unselect_pieces()
                 moved = True
+                attacking_piece.origin_lost = True
                 # Move rook if King is castled
                 if attacking_piece.name == 'king':
                     x_king_before, y_king_before = piece_coords
@@ -250,11 +241,6 @@ class Game:
             self.turn = "black"
         else:
             self.turn = "white"
-    def return_opposite_turn(self): ###
-        if self.turn == 'white':
-            return 'black'
-        else:
-            return 'white'
     def update_all_friendly_possible_moves(self):
         self.all_friendly_possible_moves = set()
         for square in self.squares:
@@ -268,14 +254,11 @@ class Game:
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
-                    if square.piece.name == 'bishop': ###
-                        game.enemy_piece = square.piece ###
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
 
         self.change_turns()
     def check_king(self):
-        # self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
         king = None
         king_other = None
@@ -341,7 +324,8 @@ class Piece:
         self.possible_captures = set()
         self.selected = False
         self.checked = False
-    
+        self.origin_lost = False
+
     def update_possible_safe_moves(self):
         self.possible_safe_moves = set()
         for square in game.squares:
@@ -357,22 +341,11 @@ class Piece:
                             captured_piece = square_destination.piece
                             square_destination.piece = moving_piece # Move
                             square_destination.piece.location = square_destination.coords
-                            # if moving_piece.name == 'pawn': ###
-                            game.moving_square1 = moving_square ###
-                            game.pawn = moving_piece  ###
-                            game.square_destination1 = square_destination  ###
                             if not game.is_friendly_king_checked():
                                 self.possible_safe_moves.add(move)
                             moving_square.piece = moving_piece
                             square_destination.piece = captured_piece
                             moving_square.piece.location = moving_square.coords
-    # def update_possible_safe_moves(self):
-        
-    #     self.update_safe_moves()
-    #     possible_moves_copy = self.possible_moves.copy()
-    #     for move in possible_moves_copy:
-    #         if move not in self.possible_safe_moves:
-    #             self.possible_moves.remove(move)
 
 class Pawn(Piece):
     def __init__(self, name, color, location):
@@ -387,7 +360,8 @@ class Pawn(Piece):
                 # Adds regular movement
                     if x_piece == x_possible_square and y_piece + self.direction_vertical() == y_possible_square:
                         self.possible_moves.add(square.coords)
-                # Adds movement from original position    
+                # Adds double movement from origin
+                if not self.is_hop():    
                     if x_piece == x_possible_square and y_piece + self.direction_vertical() * 2 == y_possible_square and self.origin == self.location:
                         self.possible_moves.add(square.coords) 
                 # Adds capture possibilities (left)
@@ -401,24 +375,20 @@ class Pawn(Piece):
                     if x_piece + direction_x == x_possible_square and y_piece + direction_y == y_possible_square:
                         self.possible_moves.add(square.coords)
                         self.possible_captures.add(square.coords)
-    def is_forward_empty(self):
+    def is_hop(self):
         for square in game.squares:
-            x_selected, y_selected = square.coords
-            x_forward, y_forward = x_selected, y_selected + self.direction_vertical()
-            for square in game.squares:
-                if square.coords == (x_forward, y_forward):
-                    if square.piece:
-                        return False
-                    return True 
-    def is_behind_empty(self):
+            if square.piece:
+                if square.coords == self.location:
+                    origin_square = square
+                    origin_x, origin_y = origin_square.coords
+                    hopped_x, hopped_y = origin_x, origin_y + self.direction_vertical()
         for square in game.squares:
-            x_selected, y_selected = square.coords
-            x_forward, y_forward = x_selected, y_selected - self.direction_vertical()
-            for square in game.squares:
-                if square.coords == (x_forward, y_forward):
+            hop_x, hop_y = square.coords
+            if hopped_x == hop_x:
+                if hopped_y == hop_y:
                     if square.piece:
-                        return False
-                    return True 
+                        return True
+        return False
     def direction_vertical(self):
         if self.color == 'white':
             return -1
@@ -601,27 +571,27 @@ class King(Piece):
                         self.possible_moves.add(square.coords)
         for factors in factors_set:
             update_possible_move(factors)
-        # Adds possible castle moves
-        def add_possible_castle(turn, x_rook_pos, y_rook_pos, factor):
+        def add_possible_castle(turn, x_rook_pos, y_rook_pos, factor):  # Adds possible castle moves
             if not self.checked:
-                for square in game.squares:
-                    if not square.piece:
-                        x_square, y_square = square.coords
-                        x_piece, y_piece = self.location
-                        if game.turn == turn:
-                            if x_square == x_piece + factor:
-                                if y_square == y_piece:
-                                    for square_rook in game.squares:
-                                        if square_rook.piece:
-                                            if square_rook.piece.name == 'rook':
-                                                if square_rook.piece.color == game.turn:
-                                                    x_rook, y_rook = square_rook.coords
-                                                    if y_rook == y_rook_pos:
-                                                        if x_rook == x_rook_pos:
-                                                            self.possible_moves.add(square.coords)
+                if not self.origin_lost:
+                    for square in game.squares:
+                        if not square.piece:
+                            x_square, y_square = square.coords
+                            x_piece, y_piece = self.location
+                            if game.turn == turn:
+                                if x_square == x_piece + factor:
+                                    if y_square == y_piece:
+                                        for square_rook in game.squares:
+                                            if square_rook.piece:
+                                                if square_rook.piece.name == 'rook':
+                                                    if square_rook.piece.color == game.turn:
+                                                        if not square_rook.piece.origin_lost:
+                                                            x_rook, y_rook = square_rook.coords
+                                                            if y_rook == y_rook_pos:
+                                                                if x_rook == x_rook_pos:
+                                                                    self.possible_moves.add(square.coords)
         if self.origin == self.location:
-            # checks if there is a piece between king and rook
-            def any_piece(turn, side):
+            def is_any_piece(turn, side): # checks if there is a piece between king and rook
                 if side == 'left':
                     x_squares = [1,2,3]
                 else:
@@ -636,17 +606,17 @@ class King(Piece):
                         if x_square in x_squares:
                             if square.piece:
                                 return True
-            if not any_piece('white', 'left'):
-                # Lower left side castle
+                ### Lower left side castle ###
+            if not is_any_piece('white', 'left'):
                 add_possible_castle('white', 0, 7, -2)
-            if not any_piece('white', 'right'):
-                # Lower right side castle
+                ### Lower right side castle ###
+            if not is_any_piece('white', 'right'):
                 add_possible_castle('white', 7, 7,  2)
-            if not any_piece('black', 'left'):
-                # Upper left side castle
+                ### Upper left side castle ###
+            if not is_any_piece('black', 'left'):
                 add_possible_castle('black', 0, 0, -2)
-            if not any_piece('black', 'right'):
-                # Upper right side castle
+                ### Upper right side castle ###
+            if not is_any_piece('black', 'right'):
                 add_possible_castle('black', 7, 0,  2)
 
 def main():
