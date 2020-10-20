@@ -201,6 +201,7 @@ class Game:
                 attacking_piece = square.piece
                 attacking_square = square
                 piece_coords = square.coords
+        moved = False
         for square in self.squares:
             if square.is_clicked() and square.coords in possible_moves:
                 attacking_square.piece = None               
@@ -242,6 +243,7 @@ class Game:
                     move_rook(7, 7, 2, -2) # Lower right
                     move_rook(0, 0, -2, 3) # Upper left
                     move_rook(7, 0, 2, -2) # Upper right
+            if moved == True:
                 return moved
     def change_turns(self):
         if self.turn == "white":
@@ -266,6 +268,8 @@ class Game:
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
+                    if square.piece.name == 'bishop':
+                        game.enemy_piece = square.piece
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
 
@@ -288,7 +292,6 @@ class Game:
                             square.piece.checked = False
 
     def is_friendly_king_checked(self):
-        self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
         for square in self.squares:
             if square.piece:
@@ -299,29 +302,7 @@ class Game:
                         else:
                             return False
 
-    def update_safe_moves(self):
-        self.safe_moves = set()
-        for square in self.squares:
-            if square.piece:
-                if square.piece.color == self.turn:
-                    moving_piece = square.piece
-                    moving_square = square
-                    possible_moves = square.piece.possible_moves.copy()
-                    for move in possible_moves:
-                        for square_destination in self.squares:
-                            if square_destination.coords == move:
-                                moving_square.piece == None
-                                captured_piece = square_destination.piece
-                                square_destination.piece = moving_piece # Move
-                                square_destination.piece.location = square_destination.coords
-                                if moving_piece.name == 'pawn':
-                                    self.pawn = moving_piece  ###
-                                    self.square_destination = square_destination  ###
-                                if not self.is_friendly_king_checked():
-                                    self.safe_moves.add(move)
-                                moving_square.piece = moving_piece
-                                square_destination.piece = captured_piece
-                                moving_square.piece.location = moving_square.coords
+
                                 
 
 class Board:
@@ -352,16 +333,44 @@ class Piece:
         self.location = location
         self.origin = location
         self.possible_moves = set()
+        self.possible_safe_moves = set()
         self.possible_captures = set()
         self.selected = False
         self.checked = False
         self.update_possible_moves()
-
+    
+    def update_safe_moves(self):
+        self.safe_moves = set()
+        for square in game.squares:
+            if square.coords == self.location:
+                moving_piece = square.piece
+                moving_square = square
+                self.update_possible_moves()
+                possible_moves = square.piece.possible_moves.copy()
+                
+                for move in possible_moves:
+                    for square_destination in game.squares:
+                        if square_destination.coords == move:
+                            moving_square.piece = None
+                            captured_piece = square_destination.piece
+                            square_destination.piece = moving_piece # Move
+                            square_destination.piece.location = square_destination.coords
+                            if moving_piece.name == 'pawn': ###
+                                game.moving_square1 = moving_square ###
+                                game.pawn = moving_piece  ###
+                                game.square_destination1 = square_destination  ###
+                            if not game.is_friendly_king_checked():
+                                self.possible_safe_moves.add(move)
+                            moving_square.piece = moving_piece
+                            square_destination.piece = captured_piece
+                            moving_square.piece.location = moving_square.coords
     def update_possible_moves_considering_safe(self):
-        game.update_safe_moves()
-        possible_moves_static = self.possible_moves.copy()
-        for move in possible_moves_static:
-            if move not in game.safe_moves:
+        
+        self.update_safe_moves()
+        print(True)
+        possible_moves_copy = self.possible_moves.copy()
+        for move in possible_moves_copy:
+            if move not in self.possible_safe_moves:
                 self.possible_moves.remove(move)
 
 class Pawn(Piece):
