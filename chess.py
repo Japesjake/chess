@@ -77,7 +77,7 @@ class Graphics:
 class Game:
     def __init__(self):
         self.squares = set()
-        self.all_friendly_possible_moves = set()
+        self.all_friendly_possible_moves = set() ###
         self.all_enemy_possible_moves = set()
         self.safe_moves = set()
         self.turn = 'white'
