@@ -77,7 +77,7 @@ class Graphics:
 class Game:
     def __init__(self):
         self.squares = set()
-        self.all_friendly_possible_moves = set()
+        self.all_friendly_possible_moves = set() ###
         self.all_enemy_possible_moves = set()
         self.safe_moves = set()
         self.turn = 'white'
@@ -97,8 +97,8 @@ class Game:
                         self.select_piece()
                         moved = self.move_piece()
                         self.check_king()
-                        if moved:
-                            self.change_turns()
+                        # if moved:
+                        #     self.change_turns()
                         
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
@@ -169,7 +169,7 @@ class Game:
         # self.set_pawns()
         # self.set_rooks()
         self.set_knights()
-        self.set_bishops()
+        # self.set_bishops()
         # self.set_queens()
         self.set_kings()
     def select_piece(self):
@@ -243,6 +243,7 @@ class Game:
                     move_rook(0, 0, -2, 3) # Upper left
                     move_rook(7, 0, 2, -2) # Upper right
             if moved == True:
+                self.change_turns()
                 return moved
     def change_turns(self):
         if self.turn == "white":
@@ -276,19 +277,17 @@ class Game:
     def check_king(self):
         # self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
+        king = None
         for square in self.squares:
-            if square.piece:
-                if square.piece.name == 'king':
-                    if square.piece.color != self.turn:
-                        if square.coords in self.all_friendly_possible_moves: 
-                            square.piece.checked = True
-                        else:
-                            square.piece.checked = False
-                    else:
-                        if square.coords in self.all_enemy_possible_moves: 
-                            square.piece.checked = True
-                        else:
-                            square.piece.checked = False
+                if square.piece:
+                    if square.piece.name == 'king':
+                        if square.piece.color == self.turn:
+                            king = square.piece
+        if king:    
+            if self.is_friendly_king_checked():
+                king.checked = True
+            else:
+                king.checked = False
     def is_friendly_king_checked(self):
         self.update_all_enemy_possible_moves()
         for square in self.squares:
