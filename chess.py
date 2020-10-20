@@ -6,6 +6,7 @@ from copy import deepcopy
 
 # To do: fix bug where pawns jump pieces at origin
 # To do: restrict movement into check.
+# To do: Test Rooks
 
 class Graphics:
     HEIGHT = 800
@@ -268,8 +269,8 @@ class Game:
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
-                    if square.piece.name == 'bishop':
-                        game.enemy_piece = square.piece
+                    if square.piece.name == 'bishop': ###
+                        game.enemy_piece = square.piece ###
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
 
@@ -486,12 +487,11 @@ class Knight(Piece):
             x_factor, y_factor = factors
             for square in game.squares:
                 x_possible_square, y_possible_square = square.coords
-                # if square.piece:
                 if square.piece and square.piece.color == game.turn:
                     pass
                 elif x_piece == x_possible_square - x_factor:
                     if y_piece == y_possible_square - y_factor:
-                        self.possible_moves.add((square.coords))
+                        self.possible_moves.add(square.coords)
         for factors in factors_set:
             update_possible_move(factors)
 
@@ -537,7 +537,7 @@ class Queen(Piece):
                 if square.coords == (x_coord, y_coord):
                     if square.piece and square.piece.color == game.turn:
                         return True
-                    self.possible_moves.add((x_coord, y_coord))
+                    self.possible_moves.add(square.coords)
                     if square.piece and square.piece.color != game.turn:
                         return True
                 # Adds possible moves in the upper right direction
@@ -598,7 +598,7 @@ class King(Piece):
                     pass
                 elif x_piece == x_possible_square - x_factor:
                     if y_piece == y_possible_square - y_factor:
-                        self.possible_moves.add((square.coords))
+                        self.possible_moves.add(square.coords)
         for factors in factors_set:
             update_possible_move(factors)
         # Adds possible castle moves
