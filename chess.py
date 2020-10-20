@@ -80,7 +80,7 @@ class Game:
         self.all_friendly_possible_moves = set()
         self.all_enemy_possible_moves = set()
         self.safe_moves = set()
-        self.turn = 'black'
+        self.turn = 'white'
         self.running = True
     def run(self):
         graphics = Graphics()
@@ -639,9 +639,6 @@ class King(Piece):
             if not any_piece('black', 'right'):
                 # Upper right side castle
                 add_possible_castle('black', 7, 0,  2)
-    def make_checked(self):
-        if not self.checked:
-            self.checked = True
 
 def main():
     global game
