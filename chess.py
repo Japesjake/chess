@@ -288,21 +288,6 @@ class Game:
                 king.checked = True
             else:
                 king.checked = False
-            
-        
-        # for square in self.squares:
-        #     if square.piece:
-        #         if square.piece.name == 'king':
-        #             if square.piece.color == self.turn:
-        #                 if square.coords in self.all_friendly_possible_moves: 
-        #                     square.piece.checked = True
-        #                 else:
-        #                     square.piece.checked = False
-        #             else:
-        #                 if square.coords in self.all_enemy_possible_moves: 
-        #                     square.piece.checked = True
-        #                 else:
-        #                     square.piece.checked = False
     def is_friendly_king_checked(self):
         self.update_all_enemy_possible_moves()
         for square in self.squares:
