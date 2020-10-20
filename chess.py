@@ -80,7 +80,7 @@ class Game:
         self.all_friendly_possible_moves = set()
         self.all_enemy_possible_moves = set()
         self.safe_moves = set()
-        self.turn = 'black'
+        self.turn = 'white'
         self.running = True
     def run(self):
         graphics = Graphics()
@@ -97,8 +97,8 @@ class Game:
                         self.select_piece()
                         moved = self.move_piece()
                         self.check_king()
-                        if moved:
-                            self.change_turns()
+                        # if moved:
+                        #     self.change_turns()
                         
     def set_squares(self):
         for y_coord in range(Board.HEIGHT):
@@ -169,7 +169,7 @@ class Game:
         # self.set_pawns()
         # self.set_rooks()
         self.set_knights()
-        self.set_bishops()
+        # self.set_bishops()
         # self.set_queens()
         self.set_kings()
     def select_piece(self):
@@ -243,7 +243,9 @@ class Game:
                     move_rook(0, 0, -2, 3) # Upper left
                     move_rook(7, 0, 2, -2) # Upper right
             if moved == True:
+                self.change_turns()
                 return moved
+
     def change_turns(self):
         if self.turn == "white":
             self.turn = "black"
@@ -255,14 +257,17 @@ class Game:
         else:
             return 'white'
     def update_all_friendly_possible_moves(self):
+        self.change_turns()
         self.all_friendly_possible_moves = set()
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
                     square.piece.update_possible_moves()
                     self.all_friendly_possible_moves.update(square.piece.possible_moves)
-    def update_all_enemy_possible_moves(self):
+
         self.change_turns()
+    def update_all_enemy_possible_moves(self):
+        # self.change_turns()
         self.all_enemy_possible_moves = set()
         for square in self.squares:
             if square.piece:
@@ -272,9 +277,9 @@ class Game:
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
 
-        self.change_turns()
+        # self.change_turns()
     def check_king(self):
-        # self.update_all_friendly_possible_moves()
+        self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
         for square in self.squares:
             if square.piece:
