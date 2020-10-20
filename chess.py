@@ -245,7 +245,6 @@ class Game:
             if moved == True:
                 self.change_turns()
                 return moved
-
     def change_turns(self):
         if self.turn == "white":
             self.turn = "black"
@@ -257,17 +256,14 @@ class Game:
         else:
             return 'white'
     def update_all_friendly_possible_moves(self):
-        self.change_turns()
         self.all_friendly_possible_moves = set()
         for square in self.squares:
             if square.piece:
                 if square.piece.color == self.turn:
                     square.piece.update_possible_moves()
                     self.all_friendly_possible_moves.update(square.piece.possible_moves)
-
-        self.change_turns()
     def update_all_enemy_possible_moves(self):
-        # self.change_turns()
+        self.change_turns()
         self.all_enemy_possible_moves = set()
         for square in self.squares:
             if square.piece:
@@ -277,14 +273,14 @@ class Game:
                     square.piece.update_possible_moves()
                     self.all_enemy_possible_moves.update(square.piece.possible_moves)
 
-        # self.change_turns()
+        self.change_turns()
     def check_king(self):
-        self.update_all_friendly_possible_moves()
+        # self.update_all_friendly_possible_moves()
         self.update_all_enemy_possible_moves()
         for square in self.squares:
             if square.piece:
                 if square.piece.name == 'king':
-                    if square.piece.color != self.turn:
+                    if square.piece.color == self.turn:
                         if square.coords in self.all_friendly_possible_moves: 
                             square.piece.checked = True
                         else:
