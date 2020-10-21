@@ -29,7 +29,7 @@ class Graphics:
         self.draw_board()
         self.draw_pieces()
         self.draw_check()
-        if Game.is_piece_selected():
+        if game.is_piece_selected():
             self.draw_possible_moves()
             self.draw_selection()
             
@@ -79,7 +79,7 @@ class Game:
         graphics = Graphics()
         board = Board()
         self.set_squares()
-        self.set_pieces()
+        # self.set_pieces()
         while self.running:
             graphics.draw()
             for event in pg.event.get():
@@ -175,8 +175,7 @@ class Game:
         for square in self.squares:
             if square.piece and square.piece.selected == True:
                 square.piece.selected = False
-    @staticmethod
-    def is_piece_selected():
+    def is_piece_selected(self):
         for square in game.squares:
             if square.piece and square.piece.selected:
                 return True
