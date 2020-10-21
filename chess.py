@@ -39,15 +39,13 @@ class Graphics:
             if square.piece:
                 self.screen.blit(square.piece.image, self.pixelate(square.coords))
     def draw_board(self):
-        self.screen.fill(Board.SQUARE_COLOR_2)
-        for y_coord in range(0,Board.HEIGHT,2):
-            for x_coord in range(0, Board.WIDTH, 2):
-                x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
+        for square in game.squares:
+            if square.color == Board.SQUARE_COLOR_1:
+                x_pixel, y_pixel = self.pixelate(square.coords)
                 pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
-        for y_coord in range(1,Board.HEIGHT,2):
-            for x_coord in range(1, Board.WIDTH, 2):
-                x_pixel, y_pixel = self.pixelate((x_coord, y_coord))
-                pg.draw.rect(self.screen,Board.SQUARE_COLOR_1,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
+            else:
+                x_pixel, y_pixel = self.pixelate(square.coords)
+                pg.draw.rect(self.screen,Board.SQUARE_COLOR_2,(x_pixel, y_pixel, Board.SQUARE_SIZE,Board.SQUARE_SIZE))
     def draw_selection(self):
         for square in game.squares:
             if square.piece and square.piece.selected:
@@ -89,12 +87,20 @@ class Game:
                     if event.button == 1:                       
                         self.select_piece()
                         self.move_piece()
-                        self.check_king()
-                        
+                        self.check_king()           
     def set_squares(self):
-        for y_coord in range(Board.HEIGHT):
-            for x_coord in range(Board.WIDTH):
-                self.squares.add(Square((x_coord, y_coord)))     
+        for y_coord in range(0,Board.HEIGHT,2):
+            for x_coord in range(0, Board.WIDTH, 2):
+                self.squares.add(Square((x_coord, y_coord), Board.SQUARE_COLOR_1))
+        for y_coord in range(1,Board.HEIGHT,2):
+            for x_coord in range(1, Board.WIDTH, 2):
+                self.squares.add(Square((x_coord, y_coord), Board.SQUARE_COLOR_1))
+        for y_coord in range(0,Board.HEIGHT,2):
+            for x_coord in range(1, Board.WIDTH, 2):
+                self.squares.add(Square((x_coord, y_coord), Board.SQUARE_COLOR_2))
+        for y_coord in range(1,Board.HEIGHT,2):
+            for x_coord in range(0, Board.WIDTH, 2):
+                self.squares.add(Square((x_coord, y_coord), Board.SQUARE_COLOR_2))
     def set_pawns(self):
         y_coord = Board.HEIGHT - 2
         for x_coord in range(Board.WIDTH):
@@ -300,9 +306,10 @@ class Board:
     SQUARE_COLOR_2 = Graphics.DARK_GREEN
 
 class Square:
-    def __init__(self, coords):
+    def __init__(self, coords, color):
         self.coords = coords
         self.highlighted = False
+        self.color = color
         self.piece = None
     def is_clicked(self):
         mouse_x, mouse_y = pg.mouse.get_pos()
