@@ -491,7 +491,7 @@ class Knight(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         factors_set = set()
-        #added factors determine by every direction possible.
+        # adds factors determine by every direction possible.
         for x in range(-1, 2):
             for y in range(-1, 2):
                 if (x, y) != (0, 0):
