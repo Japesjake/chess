@@ -599,15 +599,10 @@ class King(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         factors_set = set()
-        # Comments indicate direction e.g. U = Up, DL = Down left, etc.
-        factors_set.add((1, -1))  #UR
-        factors_set.add((0, -1))  #U
-        factors_set.add((-1, -1)) #UL
-        factors_set.add((-1, 0))  #L
-        factors_set.add((-1, 1))  #DL
-        factors_set.add((0, 1))   #D
-        factors_set.add((1 ,1))   #DR
-        factors_set.add((1, 0))   #R        
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if (x, y) != (0, 0):
+                    factors_set.add((x, y))
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
