@@ -490,17 +490,12 @@ class Knight(Piece):
     def update_possible_moves(self):
         self.possible_moves = set()
         x_piece, y_piece = self.location
-        # Direction listed first is one square away from location
-        # e.g. #UR = Upper Right or up one, right two
         factors_set = set()
-        factors_set.add((2, -1))  #UR
-        factors_set.add((1, -2))  #RU
-        factors_set.add((-2, -1)) #UL
-        factors_set.add((-1, -2)) #LU
-        factors_set.add((2, 1))   #DR
-        factors_set.add((1, 2))   #RD
-        factors_set.add((-2 ,1))  #DL
-        factors_set.add((-1, 2))  #LD
+        #added factors determine by every direction possible.
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if (x, y) != (0, 0):
+                    factors_set.add((x, y))
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
@@ -598,6 +593,7 @@ class King(Piece):
     def update_possible_moves(self):
         self.possible_moves = set()
         x_piece, y_piece = self.location
+        #Creates factors of surrounding directions 
         factors_set = set()
         for x in range(-1, 2):
             for y in range(-1, 2):
