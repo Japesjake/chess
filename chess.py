@@ -67,7 +67,7 @@ class Graphics:
 
 class Game:
     def __init__(self):
-        self.all_friendly_possible_moves = set() ###
+        self.all_friendly_possible_moves = set()
         self.all_enemy_possible_moves = set()
         self.safe_moves = set()
         self.turn = 'white'
@@ -304,7 +304,7 @@ class Board:
             #     square.piece = King('king', 'black', square.coords)
     ### Set Pieces ###
     def set_pieces(self):
-        self.set_pawns()
+        # self.set_pawns()
         self.set_rooks()
         self.set_knights()
         self.set_bishops()
@@ -492,10 +492,12 @@ class Knight(Piece):
         x_piece, y_piece = self.location
         factors_set = set()
         #added factors determine by every direction possible.
-        for x in range(-1, 2):
-            for y in range(-1, 2):
-                if (x, y) != (0, 0):
-                    factors_set.add((x, y))
+        # for x in ()
+        for x in range(-2, 3):
+            for y in range(-2, 3):
+                if x != 0 and y != 0:
+                    if abs(x) != abs(y):
+                        factors_set.add((x, y))
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
