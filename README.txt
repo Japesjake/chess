@@ -9,7 +9,6 @@ Flips board upon turn end.
 Features that should be added:
 
 Pawns need to transform into piece of choice when reaching the end of the board.
-Checkmate victory.
 
 Features that could be added:
 
