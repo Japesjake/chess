@@ -491,21 +491,12 @@ class Knight(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         factors_set = set()
-<<<<<<< HEAD
-        #added factors determine by every direction possible.
-        # for x in ()
+        #added factors for all moves.
         for x in range(-2, 3):
             for y in range(-2, 3):
                 if x != 0 and y != 0:
                     if abs(x) != abs(y):
                         factors_set.add((x, y))
-=======
-        # adds factors determine by every direction possible.
-        for x in range(-1, 2):
-            for y in range(-1, 2):
-                if (x, y) != (0, 0):
-                    factors_set.add((x, y))
->>>>>>> factor_set
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
@@ -606,14 +597,18 @@ class King(Piece):
         #Creates factors of surrounding directions 
         factors_set = set()
         # Comments indicate direction e.g. U = Up, DL = Down left, etc.
-        factors_set.add((1, -1))  #UR
-        factors_set.add((0, -1))  #U
-        factors_set.add((-1, -1)) #UL
-        factors_set.add((-1, 0))  #L
-        factors_set.add((-1, 1))  #DL
-        factors_set.add((0, 1))   #D
-        factors_set.add((1 ,1))   #DR
-        factors_set.add((1, 0))   #R        
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if (x, y) != (0, 0):
+                    factors_set.add((x, y))
+        # factors_set.add((1, -1))  #UR
+        # factors_set.add((0, -1))  #U
+        # factors_set.add((-1, -1)) #UL
+        # factors_set.add((-1, 0))  #L
+        # factors_set.add((-1, 1))  #DL
+        # factors_set.add((0, 1))   #D
+        # factors_set.add((1 ,1))   #DR
+        # factors_set.add((1, 0))   #R        
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
