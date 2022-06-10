@@ -304,7 +304,7 @@ class Board:
             #     square.piece = King('king', 'black', square.coords)
     ### Set Pieces ###
     def set_pieces(self):
-        # self.set_pawns()
+        self.set_pawns()
         self.set_rooks()
         self.set_knights()
         self.set_bishops()
