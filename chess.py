@@ -491,6 +491,7 @@ class Knight(Piece):
         self.possible_moves = set()
         x_piece, y_piece = self.location
         factors_set = set()
+<<<<<<< HEAD
         #added factors determine by every direction possible.
         # for x in ()
         for x in range(-2, 3):
@@ -498,6 +499,13 @@ class Knight(Piece):
                 if x != 0 and y != 0:
                     if abs(x) != abs(y):
                         factors_set.add((x, y))
+=======
+        # adds factors determine by every direction possible.
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if (x, y) != (0, 0):
+                    factors_set.add((x, y))
+>>>>>>> factor_set
         def update_possible_move(factors):
             x_factor, y_factor = factors
             for square in board.squares:
